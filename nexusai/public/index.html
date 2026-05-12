@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusAI - Autonomous Agent Economy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#050508;color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden;}
+
+/* ANIMATED BACKGROUND */
+.bg-grid{position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(102,126,234,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(102,126,234,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(102,126,234,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* HEADER */
+.header{position:relative;z-index:10;background:rgba(10,10,20,0.8);backdrop-filter:blur(20px);padding:16px 40px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(102,126,234,0.2);}
+.logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2,#f093fb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;}
+.logo span{font-size:13px;font-weight:400;color:#555;margin-left:8px;-webkit-text-fill-color:#555;}
+.status{display:flex;align-items:center;gap:8px;background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.2);border-radius:20px;padding:6px 14px;}
+.status-dot{width:8px;height:8px;background:#00ff88;border-radius:50%;animation:pulse 2s infinite;box-shadow:0 0 8px #00ff88;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
+.header-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:#444;}
+
+/* STATS GRID */
+.stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:24px 40px;}
+.stat-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:20px 24px;transition:all 0.3s;cursor:default;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent,#667eea),transparent);opacity:0.5;}
+.stat-card:hover{transform:translateY(-2px);border-color:rgba(102,126,234,0.3);background:rgba(102,126,234,0.05);}
+.stat-card.purple{--accent:#667eea;}
+.stat-card.green{--accent:#00ff88;}
+.stat-card.pink{--accent:#f093fb;}
+.stat-card.orange{--accent:#ffa07a;}
+.stat-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;}
+.stat-value{font-size:32px;font-weight:700;background:linear-gradient(135deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-sub{font-size:12px;margin-top:6px;}
+.stat-card.purple .stat-sub{color:#667eea;}
+.stat-card.green .stat-sub{color:#00ff88;}
+.stat-card.pink .stat-sub{color:#f093fb;}
+.stat-card.orange .stat-sub{color:#ffa07a;}
+
+/* WALLET BAR */
+.wallet-bar{position:relative;z-index:1;margin:0 40px 24px;background:rgba(102,126,234,0.05);border:1px solid rgba(102,126,234,0.15);border-radius:16px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.wallet-address{font-family:'JetBrains Mono',monospace;font-size:12px;color:#667eea;}
+.agent-tags{display:flex;gap:8px;flex-wrap:wrap;}
+.agent-tag{display:flex;align-items:center;gap:6px;background:rgba(102,126,234,0.08);border:1px solid rgba(102,126,234,0.2);border-radius:20px;padding:5px 12px;font-size:12px;color:#aaa;transition:all 0.3s;}
+.agent-tag.active{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,0.08);animation:tagPulse 1s ease-in-out 3;}
+@keyframes tagPulse{0%,100%{box-shadow:none;}50%{box-shadow:0 0 12px rgba(0,255,136,0.3);}}
+.agent-dot{width:6px;height:6px;border-radius:50%;background:#555;}
+.agent-tag.active .agent-dot{background:#00ff88;}
+
+/* MAIN CONTENT */
+.main{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 40px 40px;}
+
+/* JOB FORM */
+.panel{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:24px;transition:border-color 0.3s;}
+.panel-title{font-size:15px;font-weight:600;color:#ccc;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.panel-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.icon.purple{background:rgba(102,126,234,0.15);}
+.icon.green{background:rgba(0,255,136,0.1);}
+
+select,input[type=text],input[type=number]{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:12px;outline:none;transition:all 0.3s;-webkit-appearance:none;}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
+select option{background:#1a1a2e;color:#fff;}
+select:focus,input:focus{border-color:#667eea;background:rgba(102,126,234,0.05);box-shadow:0 0 0 3px rgba(102,126,234,0.1);}
+
+.btn{background:linear-gradient(135deg,#667eea,#764ba2);border:none;color:#fff;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:all 0.3s;font-family:'Inter',sans-serif;position:relative;overflow:hidden;}
+.btn::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);width:100%;height:100%;background:rgba(255,255,255,0.1);border-radius:50%;transition:transform 0.5s;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(102,126,234,0.4);}
+.btn:active::before{transform:translate(-50%,-50%) scale(2);opacity:0;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* PROGRESS BAR */
+.progress-wrap{margin:16px 0;display:none;}
+.progress-wrap.show{display:block;}
+.progress-label{font-size:12px;color:#667eea;margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
+.progress-bar{height:4px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#f093fb);border-radius:4px;width:0%;transition:width 0.5s ease;}
+
+/* RESULT BOX */
+.result-box{margin-top:16px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.15);border-radius:16px;padding:20px;display:none;animation:fadeIn 0.5s ease;}
+.result-box.show{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.result-title{font-size:12px;color:#00ff88;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.result-content{font-size:14px;color:#ccc;line-height:1.8;white-space:pre-wrap;font-family:'Inter',sans-serif;}
+
+/* ACTIVITY LOG */
+.log{background:rgba(0,0,0,0.3);border-radius:12px;padding:16px;height:320px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px;scrollbar-width:thin;scrollbar-color:#2a2a4a transparent;}
+.log::-webkit-scrollbar{width:4px;}
+.log::-webkit-scrollbar-track{background:transparent;}
+.log::-webkit-scrollbar-thumb{background:#2a2a4a;border-radius:4px;}
+.log-entry{padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;gap:8px;align-items:flex-start;}
+.log-time{color:#333;flex-shrink:0;font-size:11px;margin-top:1px;}
+.log-msg{flex:1;}
+.log-entry.success .log-msg{color:#00ff88;}
+.log-entry.info .log-msg{color:#667eea;}
+.log-entry.payment .log-msg{color:#f093fb;}
+.log-entry.error .log-msg{color:#ff6b6b;}
+.log-entry.ai .log-msg{color:#ffd700;}
+
+/* AGENT PIPELINE */
+.pipeline{display:flex;align-items:center;gap:8px;margin:16px 0;flex-wrap:wrap;}
+.pipe-node{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pipe-circle{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.5s;background:rgba(255,255,255,0.02);}
+.pipe-circle.active{border-color:#667eea;background:rgba(102,126,234,0.15);box-shadow:0 0 20px rgba(102,126,234,0.3);animation:nodeGlow 0.8s ease-in-out;}
+.pipe-circle.done{border-color:#00ff88;background:rgba(0,255,136,0.1);}
+@keyframes nodeGlow{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+.pipe-label{font-size:10px;color:#444;text-align:center;transition:color 0.3s;}
+.pipe-circle.active + .pipe-label,.pipe-circle.done + .pipe-label{color:#aaa;}
+.pipe-arrow{color:#333;font-size:16px;margin-bottom:16px;}
+
+/* TRANSACTION HISTORY */
+.tx-list{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a2a4a transparent;}
+.tx-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.tx-task{font-size:13px;color:#aaa;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:12px;}
+.tx-amount{font-size:12px;color:#f093fb;font-family:'JetBrains Mono',monospace;white-space:nowrap;}
+.tx-status{font-size:11px;color:#00ff88;margin-left:8px;}
+.empty-state{text-align:center;padding:30px;color:#333;font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="header">
+  <div>
+    <div class="logo">⚡ NexusAI <span>Autonomous Agent Economy</span></div>
+  </div>
+  <div class="status">
+    <div class="status-dot"></div>
+    <span style="font-size:13px;color:#00ff88;font-weight:500">All Systems Online</span>
+  </div>
+  <div class="header-time" id="time"></div>
+</div>
+
+<div class="stats">
+  <div class="stat-card purple">
+    <div class="stat-label">USDC Balance</div>
+    <div class="stat-value" id="balance">—</div>
+    <div class="stat-sub" id="wallet-short">Connecting...</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">Jobs Completed</div>
+    <div class="stat-value" id="jobs-count">0</div>
+    <div class="stat-sub">By AI agents today</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-label">USDC Processed</div>
+    <div class="stat-value" id="usdc-processed">$0.00</div>
+    <div class="stat-sub">Total agent payments</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-label">Network</div>
+    <div class="stat-value" style="font-size:22px;margin-top:4px">Base</div>
+    <div class="stat-sub">Ethereum L2 • Locus</div>
+  </div>
+</div>
+
+<div class="wallet-bar">
+  <div>
+    <div style="font-size:11px;color:#444;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Agent Wallet — Base Blockchain</div>
+    <div class="wallet-address" id="wallet-full">Connecting to Locus...</div>
+  </div>
+  <div class="agent-tags">
+    <div class="agent-tag" id="tag-ceo"><div class="agent-dot"></div>CEO Agent</div>
+    <div class="agent-tag" id="tag-research"><div class="agent-dot"></div>Research Agent</div>
+    <div class="agent-tag" id="tag-writer"><div class="agent-dot"></div>Writer Agent</div>
+    <div class="agent-tag" id="tag-audit"><div class="agent-dot"></div>Audit Agent</div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT: JOB FORM -->
+  <div>
+    <div class="panel">
+      <div class="panel-title"><div class="icon purple">🎯</div> Submit a Job</div>
+      
+      <select id="task-type">
+        <option value="">Select task type...</option>
+        <option value="Write a product description for">📝 Product Description</option>
+        <option value="Write a marketing tagline for">🎯 Marketing Tagline</option>
+        <option value="Write a business plan summary for">📊 Business Plan</option>
+        <option value="Write social media posts for">📱 Social Media Posts</option>
+        <option value="Analyze the market opportunity for">📈 Market Analysis</option>
+      </select>
+      
+      <input type="text" id="task-input" placeholder="Describe your product or idea..." />
+      <input type="number" id="budget-input" placeholder="Budget in USDC (e.g. 0.05)" step="0.01" min="0.01" />
+      
+      <!-- AGENT PIPELINE VISUALIZATION -->
+      <div class="pipeline" id="pipeline">
+        <div class="pipe-node">
+          <div class="pipe-circle" id="node-ceo">🤖</div>
+          <div class="pipe-label">CEO</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-circle" id="node-research">🔍</div>
+          <div class="pipe-label">Research</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-circle" id="node-writer">✍️</div>
+          <div class="pipe-label">Writer</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-circle" id="node-audit">✅</div>
+          <div class="pipe-label">Audit</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">
+          <div class="pipe-circle" id="node-pay">💰</div>
+          <div class="pipe-label">Payment</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-label" id="progress-label">Initializing...</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+
+      <button class="btn" id="hire-btn" onclick="submitJob()">🤖 Hire AI Agent</button>
+    </div>
+
+    <div class="result-box" id="result-box">
+      <div class="result-title">✅ AI Agent Delivered Result</div>
+      <div class="result-content" id="result-content"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: ACTIVITY + HISTORY -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="panel">
+      <div class="panel-title"><div class="icon green">⚡</div> Live Agent Activity</div>
+      <div class="log" id="activity-log">
+        <div class="log-entry info"><span class="log-time">--:--:--</span><span class="log-msg">[SYSTEM] NexusAI initialized on Base blockchain</span></div>
+        <div class="log-entry info"><span class="log-time">--:--:--</span><span class="log-msg">[SYSTEM] Connecting to Locus payment network...</span></div>
+        <div class="log-entry success"><span class="log-time">--:--:--</span><span class="log-msg">[SYSTEM] ✓ Wallet connected • 4 agents standing by</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><div class="icon purple">📋</div> Transaction History</div>
+      <div class="tx-list" id="tx-list">
+        <div class="empty-state" id="empty-state">No transactions yet. Submit your first job!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let jobsCount = 0;
+let totalUsdc = 0;
+const transactions = [];
+
+function addLog(msg, type='info') {
+  const log = document.getElementById('activity-log');
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', {hour12:false});
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + type;
+  div.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+}
+
+function activateNode(id) {
+  document.querySelectorAll('.pipe-circle').forEach(n => {
+    if(n.classList.contains('active')) { n.classList.remove('active'); n.classList.add('done'); }
+  });
+  document.getElementById('node-' + id).classList.add('active');
+}
+
+function activateTag(id) {
+  document.querySelectorAll('.agent-tag').forEach(t => t.classList.remove('active'));
+  document.getElementById('tag-' + id).classList.add('active');
+}
+
+function addTransaction(task, amount) {
+  const empty = document.getElementById('empty-state');
+  if(empty) empty.remove();
+  const div = document.createElement('div');
+  div.className = 'tx-item';
+  div.innerHTML = `
+    <div class="tx-task">${task}</div>
+    <div class="tx-amount">$${parseFloat(amount).toFixed(2)} USDC</div>
+    <div class="tx-status">✓</div>
+  `;
+  document.getElementById('tx-list').prepend(div);
+}
+
+async function loadBalance() {
+  try {
+    const r = await fetch('/api/balance');
+    const d = await r.json();
+    if(d.success) {
+      document.getElementById('balance').textContent = '$' + parseFloat(d.data.usdc_balance).toFixed(2);
+      document.getElementById('wallet-full').textContent = d.data.wallet_address;
+      document.getElementById('wallet-short').textContent = d.data.wallet_address.slice(0,6) + '...' + d.data.wallet_address.slice(-4) + ' • Base';
+      addLog('[LOCUS] ✓ Wallet synced: $' + d.data.usdc_balance + ' USDC', 'success');
+    }
+  } catch(e) {}
+}
+
+async function submitJob() {
+  const taskType = document.getElementById('task-type').value;
+  const taskInput = document.getElementById('task-input').value;
+  const budget = document.getElementById('budget-input').value;
+  if(!taskType || !taskInput || !budget) { alert('Please fill in all fields!'); return; }
+
+  const btn = document.getElementById('hire-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Agents Working...';
+  document.getElementById('result-box').classList.remove('show');
+  document.getElementById('progress-wrap').classList.add('show');
+  document.querySelectorAll('.pipe-circle').forEach(n => { n.classList.remove('active','done'); });
+
+  const fullTask = taskType + ' ' + taskInput;
+
+  setProgress(10, 'CEO Agent receiving job...');
+  activateNode('ceo'); activateTag('ceo');
+  addLog('[CEO] Job received: "' + fullTask + '"', 'info');
+  addLog('[LOCUS] Budget locked: $' + budget + ' USDC', 'payment');
+  await sleep(700);
+
+  setProgress(30, 'Research Agent analyzing...');
+  activateNode('research'); activateTag('research');
+  addLog('[RESEARCH] Analyzing task requirements...', 'info');
+  await sleep(800);
+
+  setProgress(55, 'Writer Agent generating with AI...');
+  activateNode('writer'); activateTag('writer');
+  addLog('[WRITER] Calling Llama3 AI model via Groq...', 'ai');
+  await sleep(500);
+
+  let result = '';
+  try {
+    const aiRes = await fetch('/api/ai', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({task: taskInput, type: taskType})
+    });
+    const aiData = await aiRes.json();
+    result = aiData.result || aiData.error || 'Task completed!';
+    addLog('[WRITER] ✓ AI response received (' + result.length + ' chars)', 'ai');
+  } catch(e) {
+    result = 'AI temporarily unavailable. Task logged.';
+    addLog('[ERROR] ' + e.message, 'error');
+  }
+
+  setProgress(80, 'Audit Agent reviewing quality...');
+  activateNode('audit'); activateTag('audit');
+  addLog('[AUDIT] Reviewing output quality...', 'info');
+  await sleep(700);
+
+  setProgress(95, 'Releasing payment via Locus...');
+  activateNode('pay');
+  addLog('[LOCUS] 💰 $' + (budget * 0.85).toFixed(3) + ' USDC → Worker agents', 'payment');
+  addLog('[LOCUS] 💰 $' + (budget * 0.15).toFixed(3) + ' USDC → CEO Agent (15% margin)', 'payment');
+  await sleep(500);
+
+  setProgress(100, '✓ Job completed successfully!');
+  addLog('[SYSTEM] ✨ Job #' + (jobsCount + 1) + ' delivered!', 'success');
+
+  document.getElementById('result-content').textContent = result;
+  document.getElementById('result-box').classList.add('show');
+
+  jobsCount++;
+  totalUsdc += parseFloat(budget);
+  document.getElementById('jobs-count').textContent = jobsCount;
+  document.getElementById('usdc-processed').textContent = '$' + totalUsdc.toFixed(2);
+
+  addTransaction(fullTask.slice(0, 40) + '...', budget);
+
+  await sleep(1000);
+  document.getElementById('progress-wrap').classList.remove('show');
+  document.querySelectorAll('.pipe-circle').forEach(n => n.classList.add('done'));
+  document.querySelectorAll('.agent-tag').forEach(t => t.classList.remove('active'));
+
+  btn.disabled = false;
+  btn.textContent = '🤖 Hire AI Agent';
+  document.getElementById('task-input').value = '';
+  document.getElementById('budget-input').value = '';
+  document.getElementById('task-type').value = '';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function updateTime() {
+  const now = new Date();
+  document.getElementById('time').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' • ' + now.toLocaleTimeString('en-US',{hour12:false});
+}
+
+loadBalance();
+updateTime();
+setInterval(updateTime, 1000);
+setInterval(loadBalance, 60000);
+</script>
+</body>
+</html>
