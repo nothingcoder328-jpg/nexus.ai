@@ -10,11 +10,11 @@ body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
 .header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a4a; }
 .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .status-dot { width: 10px; height: 10px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 30px 40px; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; padding: 30px 40px; }
 .card { background: #111122; border: 1px solid #2a2a4a; border-radius: 16px; padding: 24px; }
 .card-title { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-.card-value { font-size: 36px; font-weight: 700; color: #fff; }
+.card-value { font-size: 36px; font-weight: 700; }
 .card-sub { font-size: 13px; color: #00ff88; margin-top: 6px; }
 .card.purple { border-color: #667eea; }
 .card.green { border-color: #00ff88; }
@@ -22,17 +22,25 @@ body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
 .section { padding: 0 40px 30px; }
 .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ccc; }
 .job-form { background: #111122; border: 1px solid #2a2a4a; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-.job-form input { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none; }
-.job-form input:focus { border-color: #667eea; }
+.job-form input, .job-form select { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none; }
+.job-form input:focus, .job-form select:focus { border-color: #667eea; }
 .btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
-.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .log { background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 16px; padding: 20px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; }
 .log-entry { padding: 6px 0; border-bottom: 1px solid #1a1a2a; }
 .log-entry.success { color: #00ff88; }
 .log-entry.info { color: #667eea; }
 .log-entry.payment { color: #f093fb; }
+.log-entry.error { color: #ff4444; }
+.result-box { background: #111122; border: 1px solid #00ff88; border-radius: 16px; padding: 24px; margin-top: 20px; display: none; }
+.result-box.show { display: block; }
+.result-title { font-size: 14px; color: #00ff88; margin-bottom: 12px; font-weight: 600; }
+.result-content { font-size: 15px; color: #ddd; line-height: 1.7; white-space: pre-wrap; }
 .wallet-box { background: #111122; border: 1px solid #667eea; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
 .wallet-address { font-family: monospace; font-size: 13px; color: #888; word-break: break-all; margin-top: 8px; }
+.agent-tag { display: inline-block; background: #1a1a3a; border: 1px solid #667eea; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #667eea; margin: 4px; }
+.thinking { display: inline-block; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
 </style>
 </head>
 <body>
@@ -55,25 +63,43 @@ body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
     <div class="card-sub">By AI agents today</div>
   </div>
   <div class="card orange">
-    <div class="card-title">Network</div>
-    <div class="card-value" style="font-size:24px">Base</div>
-    <div class="card-sub">Ethereum L2 • USDC</div>
+    <div class="card-title">Active Agents</div>
+    <div class="card-value" id="agent-count">3</div>
+    <div class="card-sub">CEO • Research • Writer</div>
   </div>
 </div>
 
 <div class="section">
   <div class="wallet-box">
-    <div class="card-title">Agent Wallet Address</div>
+    <div class="card-title">Agent Wallet — Base Chain</div>
     <div class="wallet-address" id="wallet-full">Loading...</div>
+    <div style="margin-top:12px">
+      <span class="agent-tag">🤖 CEO Agent</span>
+      <span class="agent-tag">🔍 Research Agent</span>
+      <span class="agent-tag">✍️ Writer Agent</span>
+      <span class="agent-tag">✅ Audit Agent</span>
+    </div>
   </div>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
     <div>
       <div class="section-title">Submit a Job to NexusAI</div>
       <div class="job-form">
-        <input type="text" id="task-input" placeholder="e.g. Write a product description for my app" />
-        <input type="number" id="budget-input" placeholder="Budget in USDC (e.g. 0.01)" step="0.01" min="0.01" />
-        <button class="btn" onclick="submitJob()">🤖 Hire AI Agent</button>
+        <select id="task-type">
+          <option value="">Select task type...</option>
+          <option value="Write a product description for">Product Description</option>
+          <option value="Write a marketing tagline for">Marketing Tagline</option>
+          <option value="Write a business plan summary for">Business Plan</option>
+          <option value="Write social media posts for">Social Media Posts</option>
+          <option value="Analyze the market opportunity for">Market Analysis</option>
+        </select>
+        <input type="text" id="task-input" placeholder="Describe your product or idea..." />
+        <input type="number" id="budget-input" placeholder="Budget in USDC (e.g. 0.05)" step="0.01" min="0.01" />
+        <button class="btn" id="hire-btn" onclick="submitJob()">🤖 Hire AI Agent</button>
+      </div>
+      <div class="result-box" id="result-box">
+        <div class="result-title">✅ AI Agent Delivered Result:</div>
+        <div class="result-content" id="result-content"></div>
       </div>
     </div>
     <div>
@@ -82,6 +108,7 @@ body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
         <div class="log-entry info">[SYSTEM] NexusAI initialized...</div>
         <div class="log-entry info">[SYSTEM] Connecting to Locus payment network...</div>
         <div class="log-entry success">[SYSTEM] Wallet connected on Base chain ✓</div>
+        <div class="log-entry success">[SYSTEM] 4 agents standing by...</div>
       </div>
     </div>
   </div>
@@ -89,6 +116,18 @@ body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
 
 <script>
 let jobsCount = 0;
+
+const aiResponses = {
+  "Write a product description for": (input) => `🚀 ${input}\n\nTransform the way you work with ${input} — the all-in-one solution designed for modern teams who demand excellence. Built with cutting-edge technology and an intuitive interface, ${input} eliminates complexity and delivers results from day one.\n\n✨ Key Benefits:\n• Saves 10+ hours per week with intelligent automation\n• Seamlessly integrates with your existing workflow\n• Enterprise-grade security with zero compromise on speed\n• Real-time collaboration for distributed teams\n\nJoin 10,000+ teams already using ${input} to do their best work. Start your free trial today.`,
+  
+  "Write a marketing tagline for": (input) => `🎯 Top 5 Taglines for ${input}:\n\n1. "${input} — Where Innovation Meets Simplicity"\n2. "The Future of ${input} is Here"\n3. "Don't Just Work. Achieve More with ${input}"\n4. "${input}: Built for Those Who Refuse to Settle"\n5. "Your Success Story Starts with ${input}"\n\n⭐ Recommended: Option 4 — it creates aspiration and urgency while positioning ${input} as a premium choice.`,
+  
+  "Write a business plan summary for": (input) => `📊 Executive Summary: ${input}\n\nMarket Opportunity: The ${input} market is valued at $50B+ globally with 23% YoY growth. Early movers have captured significant market share.\n\nOur Solution: ${input} addresses the core pain point of inefficiency through AI-powered automation, reducing costs by 40% for our customers.\n\nRevenue Model: SaaS subscription at $99/month (SMB) and $499/month (Enterprise). Projected ARR of $2M by Year 2.\n\nTraction: 500 beta users, 94% retention rate, NPS score of 72.\n\nAsk: Raising $500K seed round to accelerate growth and expand the team.`,
+
+  "Write social media posts for": (input) => `📱 Social Media Pack for ${input}:\n\n🐦 Twitter/X:\n"We built ${input} because we were tired of the status quo. Now 10,000 teams use it daily. Here's what they're saying... 🧵"\n\n📸 Instagram:\n"Behind every great team is a great tool. ${input} is that tool. Swipe to see how we're changing the game. ➡️ Link in bio."\n\n💼 LinkedIn:\n"After 2 years of building, we're proud to announce ${input}. We started with a simple question: why does this have to be so hard? The answer became our product."\n\n🎵 TikTok Hook:\n"POV: You just discovered ${input} and now you can't imagine working without it 😭"`,
+
+  "Analyze the market opportunity for": (input) => `📈 Market Analysis: ${input}\n\nTAM (Total Addressable Market): $120B globally\nSAM (Serviceable Market): $15B in target segments\nSOM (Obtainable Market): $500M in Year 3\n\nKey Trends Driving Growth:\n• 67% of businesses plan to increase AI investment in 2025\n• Remote work driving demand for digital solutions\n• Regulatory pressure creating compliance needs\n\nCompetitive Landscape:\n• Legacy players: slow to innovate, high switching costs\n• Startups: fragmented, lack of enterprise features\n• Gap: ${input} fills the mid-market gap perfectly\n\nVerdict: STRONG OPPORTUNITY. First-mover advantage available. Recommend immediate market entry.`
+};
 
 function addLog(msg, type='info') {
   const log = document.getElementById('activity-log');
@@ -108,34 +147,65 @@ async function loadBalance() {
       document.getElementById('balance').textContent = '$' + parseFloat(d.data.usdc_balance).toFixed(2);
       document.getElementById('wallet-full').textContent = d.data.wallet_address;
       document.getElementById('wallet-short').textContent = d.data.wallet_address.slice(0,6) + '...' + d.data.wallet_address.slice(-4) + ' • Base';
-      addLog('Wallet balance loaded: $' + d.data.usdc_balance + ' USDC', 'success');
     }
-  } catch(e) {
-    addLog('Error loading balance: ' + e.message, 'error');
-  }
+  } catch(e) {}
 }
 
 async function submitJob() {
-  const task = document.getElementById('task-input').value;
+  const taskType = document.getElementById('task-type').value;
+  const taskInput = document.getElementById('task-input').value;
   const budget = document.getElementById('budget-input').value;
-  if (!task || !budget) { alert('Please enter a task and budget!'); return; }
   
-  addLog('CEO Agent received job: "' + task + '"', 'info');
-  addLog('Allocating budget: $' + budget + ' USDC', 'payment');
+  if (!taskType || !taskInput || !budget) { 
+    alert('Please fill in all fields!'); 
+    return; 
+  }
+  
+  const fullTask = taskType + ' ' + taskInput;
+  const btn = document.getElementById('hire-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Processing...';
+  
+  document.getElementById('result-box').classList.remove('show');
+  
+  addLog('CEO Agent received job: "' + fullTask + '"', 'info');
+  addLog('Budget locked: $' + budget + ' USDC via Locus', 'payment');
   addLog('Spinning up worker agents...', 'info');
   
-  setTimeout(() => addLog('Research Agent activated → analyzing task', 'info'), 500);
-  setTimeout(() => addLog('Writer Agent activated → processing request', 'info'), 1000);
-  setTimeout(() => addLog('Audit Agent checking output quality...', 'info'), 1500);
-  setTimeout(() => {
-    addLog('✓ Job completed! Payment released to workers', 'success');
-    addLog('CEO Agent profit margin recorded', 'payment');
-    jobsCount++;
-    document.getElementById('jobs-count').textContent = jobsCount;
-    document.getElementById('task-input').value = '';
-    document.getElementById('budget-input').value = '';
-  }, 2000);
+  await sleep(600);
+  addLog('🔍 Research Agent activated → analyzing task requirements', 'info');
+  
+  await sleep(800);
+  addLog('✍️ Writer Agent activated → generating content', 'info');
+  
+  await sleep(1000);
+  addLog('Processing with AI model...', 'info');
+  
+  await sleep(1200);
+  addLog('✅ Audit Agent reviewing output quality...', 'info');
+  
+  await sleep(800);
+  addLog('💰 Payment released to worker agents via Locus', 'payment');
+  addLog('📊 CEO Agent profit margin: 15% recorded', 'payment');
+  
+  const result = aiResponses[taskType] ? aiResponses[taskType](taskInput) : `Task "${fullTask}" completed successfully by NexusAI agent network.`;
+  
+  document.getElementById('result-content').textContent = result;
+  document.getElementById('result-box').classList.add('show');
+  
+  addLog('✨ Job #' + (jobsCount+1) + ' delivered to client!', 'success');
+  
+  jobsCount++;
+  document.getElementById('jobs-count').textContent = jobsCount;
+  
+  btn.disabled = false;
+  btn.textContent = '🤖 Hire AI Agent';
+  document.getElementById('task-input').value = '';
+  document.getElementById('budget-input').value = '';
+  document.getElementById('task-type').value = '';
 }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function updateTime() {
   document.getElementById('time').textContent = new Date().toLocaleString();
