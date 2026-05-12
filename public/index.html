@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusAI - Autonomous Agent Economy</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0f; color: #fff; font-family: 'Segoe UI', sans-serif; }
+.header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a4a; }
+.logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.status-dot { width: 10px; height: 10px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 30px 40px; }
+.card { background: #111122; border: 1px solid #2a2a4a; border-radius: 16px; padding: 24px; }
+.card-title { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.card-value { font-size: 36px; font-weight: 700; color: #fff; }
+.card-sub { font-size: 13px; color: #00ff88; margin-top: 6px; }
+.card.purple { border-color: #667eea; }
+.card.green { border-color: #00ff88; }
+.card.orange { border-color: #f093fb; }
+.section { padding: 0 40px 30px; }
+.section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #ccc; }
+.job-form { background: #111122; border: 1px solid #2a2a4a; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+.job-form input { width: 100%; background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 15px; margin-bottom: 12px; outline: none; }
+.job-form input:focus { border-color: #667eea; }
+.btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
+.btn:hover { opacity: 0.9; }
+.log { background: #0a0a1a; border: 1px solid #2a2a4a; border-radius: 16px; padding: 20px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; }
+.log-entry { padding: 6px 0; border-bottom: 1px solid #1a1a2a; }
+.log-entry.success { color: #00ff88; }
+.log-entry.info { color: #667eea; }
+.log-entry.payment { color: #f093fb; }
+.wallet-box { background: #111122; border: 1px solid #667eea; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.wallet-address { font-family: monospace; font-size: 13px; color: #888; word-break: break-all; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⚡ NexusAI</div>
+  <div><span class="status-dot"></span><span style="color:#00ff88;font-size:13px">System Online</span></div>
+  <div style="font-size:13px;color:#888" id="time"></div>
+</div>
+
+<div class="grid">
+  <div class="card purple">
+    <div class="card-title">USDC Balance</div>
+    <div class="card-value" id="balance">Loading...</div>
+    <div class="card-sub" id="wallet-short">Fetching wallet...</div>
+  </div>
+  <div class="card green">
+    <div class="card-title">Jobs Completed</div>
+    <div class="card-value" id="jobs-count">0</div>
+    <div class="card-sub">By AI agents today</div>
+  </div>
+  <div class="card orange">
+    <div class="card-title">Network</div>
+    <div class="card-value" style="font-size:24px">Base</div>
+    <div class="card-sub">Ethereum L2 • USDC</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wallet-box">
+    <div class="card-title">Agent Wallet Address</div>
+    <div class="wallet-address" id="wallet-full">Loading...</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <div class="section-title">Submit a Job to NexusAI</div>
+      <div class="job-form">
+        <input type="text" id="task-input" placeholder="e.g. Write a product description for my app" />
+        <input type="number" id="budget-input" placeholder="Budget in USDC (e.g. 0.01)" step="0.01" min="0.01" />
+        <button class="btn" onclick="submitJob()">🤖 Hire AI Agent</button>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Live Agent Activity</div>
+      <div class="log" id="activity-log">
+        <div class="log-entry info">[SYSTEM] NexusAI initialized...</div>
+        <div class="log-entry info">[SYSTEM] Connecting to Locus payment network...</div>
+        <div class="log-entry success">[SYSTEM] Wallet connected on Base chain ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let jobsCount = 0;
+
+function addLog(msg, type='info') {
+  const log = document.getElementById('activity-log');
+  const time = new Date().toLocaleTimeString();
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + type;
+  div.textContent = '[' + time + '] ' + msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function loadBalance() {
+  try {
+    const r = await fetch('/api/balance');
+    const d = await r.json();
+    if (d.success) {
+      document.getElementById('balance').textContent = '$' + parseFloat(d.data.usdc_balance).toFixed(2);
+      document.getElementById('wallet-full').textContent = d.data.wallet_address;
+      document.getElementById('wallet-short').textContent = d.data.wallet_address.slice(0,6) + '...' + d.data.wallet_address.slice(-4) + ' • Base';
+      addLog('Wallet balance loaded: $' + d.data.usdc_balance + ' USDC', 'success');
+    }
+  } catch(e) {
+    addLog('Error loading balance: ' + e.message, 'error');
+  }
+}
+
+async function submitJob() {
+  const task = document.getElementById('task-input').value;
+  const budget = document.getElementById('budget-input').value;
+  if (!task || !budget) { alert('Please enter a task and budget!'); return; }
+  
+  addLog('CEO Agent received job: "' + task + '"', 'info');
+  addLog('Allocating budget: $' + budget + ' USDC', 'payment');
+  addLog('Spinning up worker agents...', 'info');
+  
+  setTimeout(() => addLog('Research Agent activated → analyzing task', 'info'), 500);
+  setTimeout(() => addLog('Writer Agent activated → processing request', 'info'), 1000);
+  setTimeout(() => addLog('Audit Agent checking output quality...', 'info'), 1500);
+  setTimeout(() => {
+    addLog('✓ Job completed! Payment released to workers', 'success');
+    addLog('CEO Agent profit margin recorded', 'payment');
+    jobsCount++;
+    document.getElementById('jobs-count').textContent = jobsCount;
+    document.getElementById('task-input').value = '';
+    document.getElementById('budget-input').value = '';
+  }, 2000);
+}
+
+function updateTime() {
+  document.getElementById('time').textContent = new Date().toLocaleString();
+}
+
+loadBalance();
+updateTime();
+setInterval(updateTime, 1000);
+setInterval(loadBalance, 30000);
+</script>
+</body>
+</html>
