@@ -49,4 +49,60 @@ app.post('/api/ai', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+// CREATE checkout session (merchant side)
+app.post('/api/checkout/create', async (req, res) => {
+  try {
+    const { task, taskType, amount } = req.body;
+    const response = await fetch(LOCUS + '/checkout/sessions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: parseFloat(amount),
+        memo: 'NexusAI Job: ' + task,
+        receiptConfig: {
+          enabled: true,
+          fields: {
+            creditorName: 'NexusAI',
+            supportEmail: 'nexusai@agent.com',
+            lineItems: [{ description: task, amount: amount }]
+          }
+        }
+      })
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch(e) { res.json({ error: e.message }); }
+});
+
+// PREFLIGHT check
+app.get('/api/checkout/preflight/:sessionId', async (req, res) => {
+  try {
+    const r = await fetch(LOCUS + '/checkout/agent/preflight/' + req.params.sessionId, {
+      headers: { 'Authorization': 'Bearer ' + KEY }
+    });
+    res.json(await r.json());
+  } catch(e) { res.json({ error: e.message }); }
+});
+
+// PAY checkout session
+app.post('/api/checkout/pay/:sessionId', async (req, res) => {
+  try {
+    const r = await fetch(LOCUS + '/checkout/agent/pay/' + req.params.sessionId, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payerEmail: req.body.email || 'user@nexusai.com' })
+    });
+    res.json(await r.json());
+  } catch(e) { res.json({ error: e.message }); }
+});
+
+// POLL payment status
+app.get('/api/checkout/status/:txId', async (req, res) => {
+  try {
+    const r = await fetch(LOCUS + '/checkout/agent/payments/' + req.params.txId, {
+      headers: { 'Authorization': 'Bearer ' + KEY }
+    });
+    res.json(await r.json());
+  } catch(e) { res.json({ error: e.message }); }
+});
 app.listen(PORT, '0.0.0.0', () => process.stdout.write('RUNNING\n'));

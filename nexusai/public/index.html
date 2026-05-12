@@ -117,10 +117,10 @@ select:focus,input:focus{border-color:#667eea;background:rgba(102,126,234,0.05);
 .tx-status{font-size:11px;color:#00ff88;margin-left:8px;}
 .empty-state{text-align:center;padding:30px;color:#333;font-size:13px;}
 </style>
-</head>
+<link rel="stylesheet" href="style.css"></head>
 <body>
 
-<div class="bg-grid"></div>
+<div class="scanline"></div><div class="bg-grid"></div>
 <div class="bg-glow"></div>
 
 <div class="header">
@@ -170,7 +170,7 @@ select:focus,input:focus{border-color:#667eea;background:rgba(102,126,234,0.05);
   </div>
 </div>
 
-<div class="main">
+<div class="panel" style="margin:0 40px 30px;border-color:rgba(240,147,251,0.3)"><div class="panel-title"><div class="icon pink" style="background:rgba(240,147,251,0.1)">💳</div> Pay with Real USDC — Powered by Locus</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px"><input type="text" id="pay-task" placeholder="Describe your job..." style="margin:0"/><input type="number" id="pay-amount" placeholder="Amount in USDC" step="0.01" min="0.01" style="margin:0"/><input type="email" id="pay-email" placeholder="Your email for receipt" style="margin:0"/></div><button class="btn" id="pay-btn" onclick="realPayment()" style="background:linear-gradient(135deg,#f093fb,#764ba2)">💳 Pay Real USDC via Locus</button><div id="pay-status" style="margin-top:12px;font-size:13px;font-family:monospace;color:#f093fb;min-height:20px"></div></div><div class="main">
   <!-- LEFT: JOB FORM -->
   <div>
     <div class="panel">
@@ -182,7 +182,7 @@ select:focus,input:focus{border-color:#667eea;background:rgba(102,126,234,0.05);
         <option value="Write a marketing tagline for">🎯 Marketing Tagline</option>
         <option value="Write a business plan summary for">📊 Business Plan</option>
         <option value="Write social media posts for">📱 Social Media Posts</option>
-        <option value="Analyze the market opportunity for">📈 Market Analysis</option>
+        <option value="Analyze the market opportunity for">📈 Market Analysis</option><option value="Write a cold email campaign for">📧 Cold Email</option><option value="Write an investor pitch for">💼 Investor Pitch</option><option value="Write SEO blog post ideas for">🔍 SEO Blog Ideas</option><option value="Write a press release for">📰 Press Release</option><option value="Write a competitive analysis for">⚔️ Competitive Analysis</option><option value="Write a landing page copy for">🌐 Landing Page</option><option value="Write customer personas for">👥 Customer Personas</option><option value="Write a fundraising strategy for">💰 Fundraising Strategy</option><option value="Write interview questions for hiring">🎤 Interview Questions</option><option value="Write a viral tweet thread about">🐦 Viral Tweet Thread</option>
       </select>
       
       <input type="text" id="task-input" placeholder="Describe your product or idea..." />
@@ -391,6 +391,7 @@ async function submitJob() {
   document.getElementById('task-type').value = '';
 }
 
+async function realPayment(){const task=document.getElementById("pay-task").value;const amount=document.getElementById("pay-amount").value;const email=document.getElementById("pay-email").value;if(!task||!amount||!email){alert("Fill all fields!");return;}const btn=document.getElementById("pay-btn");const status=document.getElementById("pay-status");btn.disabled=true;btn.textContent="Processing...";status.textContent="[1/4] Creating checkout session via Locus...";try{const r=await fetch("/api/checkout/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task,taskType:task,amount})});const d=await r.json();if(!d.success){status.textContent="Error: "+JSON.stringify(d);btn.disabled=false;btn.textContent="💳 Pay Real USDC via Locus";return;}const sessionId=d.data.id;status.textContent="[2/4] Session created: "+sessionId.slice(0,8)+"... Running preflight check...";await new Promise(r=>setTimeout(r,1000));const r2=await fetch("/api/checkout/preflight/"+sessionId);const d2=await r2.json();status.textContent="[3/4] Preflight: "+(d2.data&&d2.data.canPay?"✓ Can pay! Processing payment...":"Blocked: "+JSON.stringify(d2));await new Promise(r=>setTimeout(r,1000));const r3=await fetch("/api/checkout/pay/"+sessionId,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});const d3=await r3.json();status.textContent="[4/4] Payment result: "+JSON.stringify(d3).slice(0,100);addLog("[LOCUS] 💳 Real payment processed for: "+task,"payment");}catch(e){status.textContent="Error: "+e.message;}btn.disabled=false;btn.textContent="💳 Pay Real USDC via Locus";}
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function updateTime() {
@@ -403,5 +404,5 @@ updateTime();
 setInterval(updateTime, 1000);
 setInterval(loadBalance, 60000);
 </script>
-</body>
+<script>for(let i=0;i<15;i++){const p=document.createElement("div");p.className="particle";p.style.left=Math.random()*100+"vw";p.style.animationDuration=(Math.random()*10+8)+"s";p.style.animationDelay=Math.random()*5+"s";p.style.width=p.style.height=(Math.random()*3+2)+"px";const colors=["#667eea","#f093fb","#00ff88","#764ba2"];p.style.background=colors[Math.floor(Math.random()*colors.length)];p.style.boxShadow="0 0 6px "+p.style.background;document.body.appendChild(p);}</script></body>
 </html>
