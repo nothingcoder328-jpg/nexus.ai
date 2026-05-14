@@ -41,7 +41,7 @@ app.post('/api/ai', async (req, res) => {
     const system = prompts[type] || 'You are a helpful AI assistant.';
     const completion = await groq.chat.completions.create({
       messages: [{ role: 'system', content: system }, { role: 'user', content: task }],
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 500
     });
     res.json({ success: true, result: completion.choices[0].message.content });
