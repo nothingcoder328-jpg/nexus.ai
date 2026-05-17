@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NexusAI — Autonomous Agent Economy · Locus Paygametic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#08090d;--ink2:#0e1117;--ink3:#141920;
+  --edge:#1c2333;--edge2:#253045;--edge3:#2e3f5a;
+  --txt:#e4e9f0;--txt2:#8a9ab5;--txt3:#4a5872;
+  --cyan:#00d4ff;--cyan2:#0099bb;--green:#00e5a0;
+  --amber:#f5a623;--red:#ff4d6a;--purple:#9b6dff;
+  --locus:#ff6b35;--locus2:#e5501a;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;--display:'Syne',sans-serif;
+}
+html{scroll-behavior:smooth;font-size:15px}
+body{background:var(--ink);color:var(--txt);font-family:var(--sans);overflow-x:hidden;line-height:1.6}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--edge3);border-radius:2px}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:16px;padding:0 40px;height:58px;background:rgba(8,9,13,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.04);transition:all .3s}
+nav.scrolled{background:rgba(8,9,13,.97);border-bottom-color:var(--edge)}
+.nav-logo{font-family:var(--display);font-size:20px;font-weight:800;color:var(--txt);letter-spacing:-.5px}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;gap:2px;margin-left:20px;flex-wrap:wrap}
+.nav-link{font-size:12px;font-weight:500;color:var(--txt2);padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .15s;background:none;border:none;font-family:var(--sans)}
+.nav-link:hover{color:var(--txt);background:rgba(255,255,255,.05)}
+.nav-link.active{color:var(--cyan)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.bal-chip{font-family:var(--mono);font-size:11px;color:var(--cyan);background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);padding:5px 14px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s}
+.bal-chip::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+.bal-chip:hover{background:rgba(0,212,255,.12)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-launch{font-family:var(--display);font-size:13px;font-weight:700;padding:8px 20px;border-radius:8px;border:none;cursor:pointer;background:var(--cyan);color:#000;transition:all .2s}
+.btn-launch:hover{background:#33dcff;transform:translateY(-1px)}
+/* LOCUS BADGE */
+.locus-badge{font-family:var(--mono);font-size:10px;color:var(--locus);background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.25);padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.locus-badge::before{content:'⚡';font-size:11px}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:80px 80px 0 80px}
+.hbg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 72% 50%,rgba(0,212,255,.055) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 15% 80%,rgba(155,109,255,.04) 0%,transparent 60%)}
+.hgrid{position:absolute;inset:0;opacity:.025;background-image:linear-gradient(var(--edge2) 1px,transparent 1px),linear-gradient(90deg,var(--edge2) 1px,transparent 1px);background-size:55px 55px}
+.hc{position:relative;z-index:2;max-width:600px}
+.hero-eye{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--locus);border:1px solid rgba(255,107,53,.3);background:rgba(255,107,53,.07);padding:5px 14px;border-radius:20px;margin-bottom:26px;letter-spacing:.5px}
+.hero-eye::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--locus);animation:blink 2s infinite}
+h1{font-family:var(--display);font-size:clamp(40px,5vw,68px);font-weight:800;line-height:1.07;letter-spacing:-2px;margin-bottom:20px}
+h1 .c{color:var(--cyan)}
+h1 .g{-webkit-text-stroke:1px rgba(0,212,255,.4);color:transparent}
+.hero-desc{font-size:15.5px;color:var(--txt2);line-height:1.72;margin-bottom:34px;max-width:480px}
+.hero-btns{display:flex;gap:12px;align-items:center;margin-bottom:44px;flex-wrap:wrap}
+.btn-p{font-family:var(--display);font-size:14px;font-weight:700;padding:13px 28px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000;transition:all .25s}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,212,255,.3)}
+.btn-locus{font-family:var(--display);font-size:14px;font-weight:700;padding:13px 28px;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,var(--locus),var(--locus2));color:#fff;border:none;transition:all .25s}
+.btn-locus:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,107,53,.3)}
+.btn-s{font-size:14px;font-weight:500;padding:13px 28px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.04);border:1px solid var(--edge2);color:var(--txt);transition:all .2s;font-family:var(--sans)}
+.btn-s:hover{background:rgba(255,255,255,.07);border-color:var(--edge3)}
+.hero-nums{display:flex;gap:32px;flex-wrap:wrap}
+.hn-val{font-family:var(--display);font-size:26px;font-weight:800;color:var(--txt)}
+.hn-val span{color:var(--cyan)}
+.hn-lbl{font-size:11px;color:var(--txt3);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+/* SPHERE */
+.hvisual{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:580px;height:580px;z-index:1;pointer-events:none}
+#sph{width:100%;height:100%}
+/* TICKER */
+.ticker{background:rgba(0,212,255,.035);border-top:1px solid rgba(0,212,255,.08);border-bottom:1px solid rgba(0,212,255,.08);padding:11px 0;overflow:hidden}
+.ttrack{display:flex;animation:tscroll 34s linear infinite;width:max-content}
+.titem{display:flex;align-items:center;gap:8px;padding:0 28px;font-family:var(--mono);font-size:11.5px;color:var(--txt2);border-right:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.up{color:var(--green)}.dn{color:var(--red)}
+@keyframes tscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+/* SECTION COMMON */
+.wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+.sec{padding:96px 0}
+.sec-lbl{font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.sec-h{font-family:var(--display);font-size:clamp(28px,3.5vw,44px);font-weight:800;letter-spacing:-1px;margin-bottom:14px;line-height:1.12}
+.sec-sub{font-size:15.5px;color:var(--txt2);max-width:500px;line-height:1.7}
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:52px}
+.fc{background:var(--ink2);border:1px solid var(--edge);border-radius:16px;padding:26px;position:relative;overflow:hidden;transition:all .3s;cursor:default}
+.fc::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,212,255,.055) 0%,transparent 60%);opacity:0;transition:opacity .3s}
+.fc:hover{border-color:rgba(0,212,255,.22);transform:translateY(-3px);box-shadow:0 0 40px rgba(0,212,255,.08)}
+.fc:hover::before{opacity:1}
+.fc-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.13)}
+.fc-icon.locus-ic{background:rgba(255,107,53,.07);border-color:rgba(255,107,53,.2)}
+.fc-ttl{font-family:var(--display);font-size:17px;font-weight:700;margin-bottom:7px}
+.fc-txt{font-size:13px;color:var(--txt2);line-height:1.65}
+.fc-badge{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:rgba(0,229,160,.09);color:var(--green);border:1px solid rgba(0,229,160,.18);letter-spacing:.5px}
+.fc-badge.new{background:rgba(255,107,53,.09);color:var(--locus);border-color:rgba(255,107,53,.25)}
+/* DARK BAND */
+.band{background:var(--ink2);border-top:1px solid var(--edge);border-bottom:1px solid var(--edge)}
+/* FORMS */
+.fl{font-family:var(--mono);font-size:10px;color:var(--txt3);letter-spacing:1.8px;text-transform:uppercase;display:block;margin-bottom:7px}
+select,input[type=text],input[type=number],input[type=email],textarea{width:100%;background:var(--ink);border:1px solid var(--edge);color:var(--txt);border-radius:10px;padding:11px 15px;font-family:var(--sans);font-size:13px;outline:none;transition:all .2s;appearance:none}
+select:focus,input:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.07)}
+textarea{resize:vertical;min-height:96px;line-height:1.6}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M5 6L0 0h10z' fill='%238a9ab5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.fgrp{margin-bottom:17px}
+/* PIPELINE */
+.pipe{display:flex;background:var(--ink);border:1px solid var(--edge);border-radius:9px;overflow:hidden;margin-bottom:18px}
+.pn{flex:1;padding:9px 6px;text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.5px;color:var(--txt3);text-transform:uppercase;border-right:1px solid var(--edge);transition:all .3s}
+.pn:last-child{border-right:none}
+.pn .nn{font-size:7px;opacity:.5;display:block;margin-bottom:1px}
+.pn.active{background:rgba(0,212,255,.08);color:var(--cyan)}
+.pn.done{background:rgba(0,229,160,.06);color:var(--green)}
+/* BUTTONS */
+.btn-sub{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:var(--display);font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000;transition:all .25s}
+.btn-sub:disabled{background:var(--edge2);color:var(--txt3);cursor:not-allowed}
+.btn-sub:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(0,212,255,.28)}
+.btn-locus-sub{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:var(--display);font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--locus),var(--locus2));color:#fff;transition:all .25s;margin-top:8px}
+.btn-locus-sub:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(255,107,53,.28)}
+.btn-locus-sub:disabled{background:var(--edge2);color:var(--txt3);cursor:not-allowed}
+.btn-clr{padding:13px 16px;border-radius:10px;background:none;border:1px solid var(--edge2);color:var(--txt2);cursor:pointer;font-size:13px;font-family:var(--sans);transition:all .2s}
+.btn-clr:hover{border-color:var(--edge3);color:var(--txt)}
+.btn-g{background:none;border:1px solid var(--edge);color:var(--txt3);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s}
+.btn-g:hover{border-color:var(--edge2);color:var(--txt)}
+.cpbtn{font-family:var(--mono);font-size:9px;color:var(--cyan);background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.18);padding:3px 9px;border-radius:4px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.cpbtn:hover{background:rgba(0,212,255,.14)}
+/* BADGE */
+.badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:.5px}
+.bc{background:rgba(0,212,255,.09);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.bg{background:rgba(0,229,160,.09);color:var(--green);border:1px solid rgba(0,229,160,.2)}
+.ba{background:rgba(245,166,35,.09);color:var(--amber);border:1px solid rgba(245,166,35,.2)}
+.bl{background:rgba(255,107,53,.09);color:var(--locus);border:1px solid rgba(255,107,53,.2)}
+/* JOB LAYOUT */
+.job-layout{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:44px;align-items:start}
+.jform{background:var(--ink3);border:1px solid var(--edge);border-radius:18px;padding:28px}
+.jresult{display:flex;flex-direction:column;gap:14px}
+.rc{background:var(--ink3);border:1px solid var(--edge);border-radius:16px;overflow:hidden;transition:all .3s}
+.rc.ok{border-color:rgba(0,229,160,.3)}
+.rh{display:flex;align-items:center;gap:9px;padding:13px 17px;border-bottom:1px solid var(--edge);background:rgba(255,255,255,.02);flex-wrap:wrap}
+.rb{padding:17px;max-height:360px;overflow-y:auto}
+.rb pre{font-family:var(--mono);font-size:11.5px;color:var(--txt);white-space:pre-wrap;line-height:1.78}
+.empty-rc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:55px 20px;color:var(--txt3);text-align:center;gap:12px}
+.empty-rc .big{font-size:42px;opacity:.25}
+/* STEP */
+.steps{display:flex;flex-direction:column;gap:9px;padding:17px;font-family:var(--mono);font-size:11px}
+.sr{display:flex;align-items:center;gap:9px;color:var(--txt3)}
+.sr.active{color:var(--cyan)}.sr.done{color:var(--green)}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.spin{width:11px;height:11px;border:2px solid rgba(0,212,255,.2);border-top-color:var(--cyan);border-radius:50%;animation:sp .65s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* AGENTS */
+.ag-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:52px}
+.ag{background:var(--ink2);border:1px solid var(--edge);border-radius:16px;padding:22px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden}
+.ag::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--ac,var(--cyan));transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.ag:hover{border-color:var(--ab,rgba(0,212,255,.3));transform:translateY(-4px)}
+.ag:hover::after{transform:scaleX(1)}
+.ag-av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:15px;background:var(--abg,rgba(0,212,255,.07));border:2px solid var(--ab,rgba(0,212,255,.15));transition:all .3s}
+.ag:hover .ag-av{box-shadow:0 0 18px var(--agl,rgba(0,212,255,.28))}
+.ag-name{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:3px}
+.ag-role{font-size:10px;color:var(--txt3);margin-bottom:10px;font-family:var(--mono);letter-spacing:.5px}
+.ag-desc{font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:14px}
+.ag-mets{display:flex;gap:14px}
+.ag-m{font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.ag-m strong{color:var(--txt);font-size:13px;display:block;font-family:var(--display)}
+.ag-cb{width:100%;margin-top:14px;padding:8px;border-radius:8px;background:none;border:1px solid var(--edge2);color:var(--txt2);font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .2s}
+.ag-cb:hover{border-color:var(--ab,rgba(0,212,255,.3));color:var(--txt)}
+/* CHAT */
+.chat-lay{display:grid;grid-template-columns:248px 1fr;border:1px solid var(--edge);border-radius:18px;overflow:hidden;height:560px;margin-top:44px}
+.chat-sb{background:var(--ink3);border-right:1px solid var(--edge);padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.csb-title{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;padding:6px 6px 10px;border-bottom:1px solid var(--edge);margin-bottom:6px}
+.cab{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:all .15s;border:1px solid transparent;background:none;width:100%;text-align:left}
+.cab:hover{background:rgba(255,255,255,.04);border-color:var(--edge)}
+.cab.on{background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.18)}
+.cav{font-size:16px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ci{flex:1;min-width:0}
+.ci .cn{font-size:13px;font-weight:500;color:var(--txt)}
+.ci .cr{font-size:10px;color:var(--txt3);font-family:var(--mono)}
+.cbadge{font-family:var(--mono);font-size:9px;color:var(--green);background:rgba(0,229,160,.09);padding:1px 5px;border-radius:3px;border:1px solid rgba(0,229,160,.14)}
+.chat-main{display:flex;flex-direction:column;background:var(--ink)}
+.ctop{display:flex;align-items:center;gap:11px;padding:13px 18px;border-bottom:1px solid var(--edge);background:var(--ink2)}
+.ctname{font-weight:600;font-size:14px;font-family:var(--display)}
+.ctsub{font-size:11px;color:var(--txt3);font-family:var(--mono)}
+.cmsgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.mw{display:flex;gap:10px;animation:mIn .22s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.mw.user{flex-direction:row-reverse}
+.mav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px}
+.mbub{padding:10px 14px;border-radius:11px;font-size:13px;line-height:1.65;max-width:78%}
+.mw.agent .mbub{background:var(--ink2);border:1px solid var(--edge);border-radius:4px 11px 11px 11px}
+.mw.user .mbub{background:rgba(0,212,255,.09);border:1px solid rgba(0,212,255,.18);border-radius:11px 4px 11px 11px}
+.mtime{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:3px}
+.mw.agent .mtime{text-align:left}.mw.user .mtime{text-align:right}
+.tybub{padding:10px 14px;background:var(--ink2);border:1px solid var(--edge);border-radius:4px 11px 11px 11px;display:flex;gap:4px;align-items:center}
+.td{width:5px;height:5px;border-radius:50%;background:var(--txt3);animation:td .8s infinite}
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+@keyframes td{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-4px);opacity:1}}
+.cinp-row{padding:12px 18px;border-top:1px solid var(--edge);background:var(--ink2);display:flex;gap:9px;align-items:flex-end}
+.cinp{flex:1;background:var(--ink);border:1px solid var(--edge);color:var(--txt);border-radius:9px;padding:9px 13px;font-family:var(--sans);font-size:13px;outline:none;resize:none;line-height:1.5;min-height:38px;max-height:110px;transition:border-color .2s}
+.cinp:focus{border-color:var(--cyan)}
+.btn-send{padding:9px 16px;border-radius:9px;border:none;cursor:pointer;background:var(--cyan);color:#000;font-family:var(--display);font-size:13px;font-weight:700;transition:all .2s;flex-shrink:0}
+.btn-send:hover{background:#33dcff}
+.btn-send:disabled{background:var(--edge2);color:var(--txt3);cursor:not-allowed}
+/* ANALYTICS */
+.an-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:44px}
+.an-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.sc{background:var(--ink2);border:1px solid var(--edge);border-radius:13px;padding:18px;position:relative;overflow:hidden;transition:all .3s}
+.sc::before{content:'';position:absolute;top:-18px;right:-18px;width:72px;height:72px;border-radius:50%;background:var(--sg,rgba(0,212,255,.05))}
+.sc:hover{border-color:var(--edge2);transform:translateY(-2px)}
+.slbl{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}
+.sval{font-family:var(--display);font-size:27px;font-weight:800;color:var(--txt);margin-bottom:3px}
+.sval.cy{color:var(--cyan)}.sval.gr{color:var(--green)}.sval.am{color:var(--amber)}.sval.lo{color:var(--locus)}
+.ssub{font-size:11px;color:var(--txt3)}
+.cc{background:var(--ink2);border:1px solid var(--edge);border-radius:13px;padding:20px}
+.ct{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.bar-list{display:flex;flex-direction:column;gap:9px}
+.brow{display:flex;flex-direction:column;gap:4px}
+.bmeta{display:flex;justify-content:space-between;font-size:11px}
+.blbl{color:var(--txt2)}.bval{font-family:var(--mono);color:var(--cyan)}
+.btrack{height:4px;background:var(--edge);border-radius:2px;overflow:hidden}
+.bfill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.23,1,.32,1)}
+.minichart{height:110px;display:flex;align-items:flex-end;gap:3px;padding-top:8px}
+.mb{flex:1;background:rgba(0,212,255,.13);border-radius:3px 3px 0 0;transition:all .3s;cursor:pointer;position:relative;min-height:4px}
+.mbt{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:8px;color:var(--cyan);opacity:0;white-space:nowrap;transition:opacity .2s}
+.mb:hover .mbt{opacity:1}
+/* HISTORY TABLE */
+.htable{width:100%;border-collapse:collapse;font-size:12px;margin-top:20px}
+.htable th{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--edge);text-align:left;white-space:nowrap}
+.htable td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.htable tr:hover td{background:rgba(255,255,255,.02)}
+.mc{font-family:var(--mono)}
+.sp{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.spg{background:rgba(0,229,160,.08);color:var(--green);border:1px solid rgba(0,229,160,.18)}
+.spa{background:rgba(245,166,35,.08);color:var(--amber);border:1px solid rgba(245,166,35,.18)}
+.spr{background:rgba(255,77,106,.08);color:var(--red);border:1px solid rgba(255,77,106,.18)}
+.spc{background:rgba(155,109,255,.08);color:var(--purple);border:1px solid rgba(155,109,255,.18)}
+.etbl{text-align:center;color:var(--txt3);font-family:var(--mono);font-size:11px;padding:36px}
+.htop{display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.fb{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--edge2);color:var(--txt3);background:none;cursor:pointer;transition:all .15s}
+.fb:hover{border-color:var(--edge3);color:var(--txt)}
+.fb.on{border-color:rgba(0,212,255,.3);color:var(--cyan);background:rgba(0,212,255,.07)}
+/* BATTLE */
+.bwrap{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:44px;align-items:start}
+.bctrl{background:var(--ink2);border:1px solid var(--edge);border-radius:18px;padding:26px}
+.barena{display:flex;align-items:center;gap:14px;margin-top:20px;padding-top:18px;border-top:1px solid var(--edge)}
+.bf{flex:1;background:var(--ink3);border:1px solid var(--edge);border-radius:14px;padding:20px;text-align:center;transition:all .3s}
+.bf.win{border-color:rgba(0,229,160,.4);box-shadow:0 0 28px rgba(0,229,160,.1)}
+.bf.lose{opacity:.45}
+.bfem{font-size:32px;margin-bottom:9px}
+.bfn{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:2px}
+.bfr{font-size:10px;color:var(--txt3);font-family:var(--mono);margin-bottom:12px}
+.bfsc{font-family:var(--display);font-size:26px;font-weight:800;margin-bottom:6px}
+.cy2{color:var(--cyan)}.pu2{color:var(--purple)}.lo2{color:var(--locus)}
+.sbar{height:4px;background:var(--edge);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.sf{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.23,1,.32,1)}
+.bvs{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.vstext{font-family:var(--display);font-size:20px;font-weight:800;color:var(--txt3)}
+.bres{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.brc{background:var(--ink2);border:1px solid var(--edge);border-radius:13px;overflow:hidden}
+.brh{padding:10px 15px;border-bottom:1px solid var(--edge);font-family:var(--mono);font-size:10px;color:var(--txt3);letter-spacing:.5px;text-transform:uppercase}
+.brb{padding:15px;font-size:12px;color:var(--txt2);line-height:1.7;max-height:200px;overflow-y:auto}
+.vcard{grid-column:1/-1}
+/* REVEAL ANIMATION */
+.rev{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
+.rev.vis{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+/* FOOTER */
+footer{background:var(--ink2);border-top:1px solid var(--edge);padding:52px 0 28px}
+.finner{max-width:1200px;margin:0 auto;padding:0 40px}
+.fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.fbrand{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:12px}
+.fbrand span{color:var(--locus)}
+.fdesc{font-size:12px;color:var(--txt3);line-height:1.7;max-width:260px}
+.fct{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.fl2{display:block;font-size:12px;color:var(--txt2);margin-bottom:7px;cursor:pointer;transition:color .15s}
+.fl2:hover{color:var(--cyan)}
+.fbottom{border-top:1px solid var(--edge);padding-top:20px;display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);flex-wrap:wrap;gap:10px}
+/* TOASTS */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:10px;font-size:13px;font-family:var(--sans);backdrop-filter:blur(10px);animation:tIn .25s ease;pointer-events:auto}
+.toast.ok{background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.25);color:var(--green)}
+.toast.err{background:rgba(255,77,106,.12);border:1px solid rgba(255,77,106,.25);color:var(--red)}
+.toast.info{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);color:var(--cyan)}
+.toast.locus{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.22);color:var(--locus)}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* ═══ NEW FEATURE STYLES ═══ */
+
+/* 1. LEADERBOARD */
+.lb-table{width:100%;border-collapse:collapse;font-size:12px}
+.lb-table tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.lb-table tr:hover{background:rgba(255,255,255,.02)}
+.lb-table td{padding:11px 14px;vertical-align:middle}
+.lb-rank{font-family:var(--display);font-size:18px;font-weight:800;width:40px;text-align:center}
+.lb-rank.gold{color:#ffd700}.lb-rank.silver{color:#c0c0c0}.lb-rank.bronze{color:#cd7f32}
+.lb-name{font-weight:600;font-size:13px}
+.lb-score{font-family:var(--mono);font-size:12px;color:var(--cyan);text-align:right}
+.lb-bar{height:3px;background:var(--edge);border-radius:2px;overflow:hidden;margin-top:4px}
+.lb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--locus),var(--amber))}
+
+/* 2. LOCUS PAYMENT PANEL */
+.pay-panel{background:var(--ink2);border:1px solid var(--edge);border-radius:18px;padding:24px}
+.pay-status{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:10px;background:var(--ink3);border:1px solid var(--edge);margin-bottom:16px}
+.pay-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pay-dot.active{background:var(--green);animation:blink 2s infinite}
+.pay-dot.pending{background:var(--amber);animation:blink 1s infinite}
+.pay-info{flex:1}
+.pay-label{font-family:var(--mono);font-size:10px;color:var(--txt3);letter-spacing:1px;text-transform:uppercase}
+.pay-value{font-family:var(--display);font-size:15px;font-weight:700;color:var(--txt)}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.pay-card{background:var(--ink3);border:1px solid var(--edge);border-radius:10px;padding:14px}
+.pay-card-lbl{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.pay-card-val{font-family:var(--display);font-size:20px;font-weight:800}
+.txlist{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto}
+.txrow{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--ink3);border-radius:9px;border:1px solid var(--edge)}
+.txrow-icon{font-size:15px;flex-shrink:0}
+.txrow-info{flex:1;min-width:0}
+.txrow-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.txrow-time{font-family:var(--mono);font-size:9px;color:var(--txt3)}
+.txrow-amount{font-family:var(--mono);font-size:12px;font-weight:600}
+.txrow-amount.credit{color:var(--green)}
+.txrow-amount.debit{color:var(--locus)}
+
+/* 3. GAMIFICATION - XP / LEVEL */
+.xp-bar-wrap{background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px;margin-bottom:16px}
+.xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.xp-level{font-family:var(--display);font-size:22px;font-weight:800;color:var(--locus)}
+.xp-title{font-size:12px;color:var(--txt2)}
+.xp-bar{height:8px;background:var(--edge);border-radius:4px;overflow:hidden}
+.xp-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--locus),var(--amber));transition:width 1s cubic-bezier(.23,1,.32,1)}
+.xp-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:5px}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.bitem{background:var(--ink3);border:1px solid var(--edge);border-radius:10px;padding:12px;text-align:center;transition:all .2s;cursor:default}
+.bitem.earned{border-color:rgba(255,107,53,.3);background:rgba(255,107,53,.05)}
+.bitem.earned:hover{transform:translateY(-2px)}
+.bitem-icon{font-size:22px;margin-bottom:5px}
+.bitem-name{font-size:10px;color:var(--txt3);font-family:var(--mono)}
+.bitem.earned .bitem-name{color:var(--locus)}
+.bitem-locked{filter:grayscale(1);opacity:.3}
+
+/* 4. SMART TEMPLATES */
+.tmpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.tcard{background:var(--ink2);border:1px solid var(--edge);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.tcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--tc,var(--cyan));transform:scaleX(0);transition:transform .2s;transform-origin:left}
+.tcard:hover{border-color:var(--tc,rgba(0,212,255,.3));transform:translateY(-2px)}
+.tcard:hover::before{transform:scaleX(1)}
+.tcard-emoji{font-size:22px;margin-bottom:8px}
+.tcard-name{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px}
+.tcard-desc{font-size:11px;color:var(--txt3)}
+.tcard-price{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:10px;color:var(--amber)}
+
+/* 5. AGENT TOURNAMENT */
+.tourn-bracket{display:flex;gap:20px;margin-top:24px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+.tourn-round{display:flex;flex-direction:column;gap:12px;flex-shrink:0}
+.tourn-round-label{font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;text-align:center}
+.tm{background:var(--ink2);border:1px solid var(--edge);border-radius:8px;padding:10px 14px;min-width:140px;display:flex;align-items:center;gap:8px;font-size:12px;transition:all .2s}
+.tm.winner{border-color:rgba(255,107,53,.4);background:rgba(255,107,53,.05);color:var(--locus)}
+.tm.loser{opacity:.35}
+.tm-em{font-size:15px;flex-shrink:0}
+.tm-score{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--txt3)}
+.tm.winner .tm-score{color:var(--locus)}
+.tourn-connector{display:flex;align-items:center;flex-direction:column;justify-content:center;gap:8px;flex-shrink:0}
+.tourn-line{width:22px;height:2px;background:var(--edge)}
+
+/* 6. STREAK TRACKER */
+.streak-display{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.streak-day{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);border:1px solid var(--edge);transition:all .2s}
+.streak-day.active{background:rgba(255,107,53,.12);border-color:rgba(255,107,53,.35);color:var(--locus)}
+.streak-day.today{background:var(--locus);border-color:var(--locus);color:#fff;font-weight:700;animation:pulse-lo 2s infinite}
+@keyframes pulse-lo{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,.4)}50%{box-shadow:0 0 0 6px rgba(255,107,53,0)}}
+
+/* 7. REWARD SHOP */
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.shop-card{background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px;transition:all .2s;text-align:center}
+.shop-card:hover{border-color:rgba(255,107,53,.25);transform:translateY(-2px)}
+.shop-emoji{font-size:28px;margin-bottom:10px}
+.shop-name{font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:4px}
+.shop-desc{font-size:11px;color:var(--txt3);margin-bottom:12px}
+.shop-price{display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--mono);font-size:13px;color:var(--locus);font-weight:600;margin-bottom:10px}
+.btn-redeem{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,107,53,.3);background:rgba(255,107,53,.07);color:var(--locus);font-size:12px;font-family:var(--display);font-weight:700;cursor:pointer;transition:all .2s}
+.btn-redeem:hover{background:rgba(255,107,53,.14);border-color:rgba(255,107,53,.4)}
+.btn-redeem:disabled{opacity:.4;cursor:not-allowed}
+
+/* 8. LIVE FEED */
+.live-feed{display:flex;flex-direction:column;gap:7px;max-height:320px;overflow-y:auto;padding-right:4px}
+.feed-item{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;background:var(--ink2);border-radius:9px;border:1px solid var(--edge);animation:mIn .3s ease}
+.feed-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.feed-info{flex:1}
+.feed-msg{font-size:12px;color:var(--txt)}
+.feed-time{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:2px}
+.feed-amount{font-family:var(--mono);font-size:11px;color:var(--green);flex-shrink:0}
+
+/* 9. SMART PRICING */
+.price-display{background:var(--ink3);border:1px solid rgba(255,107,53,.2);border-radius:12px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.price-icon{font-size:22px}
+.price-info{flex:1}
+.price-val{font-family:var(--display);font-size:24px;font-weight:800;color:var(--locus)}
+.price-label{font-size:11px;color:var(--txt3);font-family:var(--mono)}
+.price-boost{font-family:var(--mono);font-size:10px;color:var(--green);background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.18);padding:3px 8px;border-radius:4px}
+
+/* 10. BULK JOB QUEUE */
+.queue-list{display:flex;flex-direction:column;gap:8px;margin-top:16px;max-height:280px;overflow-y:auto}
+.qitem{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--ink2);border:1px solid var(--edge);border-radius:9px;font-size:12px;transition:all .2s}
+.qitem:hover{border-color:var(--edge2)}
+.qitem-num{font-family:var(--mono);font-size:10px;color:var(--txt3);width:20px;text-align:center;flex-shrink:0}
+.qitem-info{flex:1;min-width:0}
+.qitem-type{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qitem-status{font-family:var(--mono);font-size:9px;flex-shrink:0}
+.qitem-amount{font-family:var(--mono);font-size:11px;color:var(--amber);flex-shrink:0}
+.btn-remove{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px;transition:color .15s;flex-shrink:0;padding:0 2px}
+.btn-remove:hover{color:var(--red)}
+
+/* 11. AGENT RATINGS */
+.rating-stars{display:flex;gap:3px;margin-bottom:6px}
+.star{font-size:14px;cursor:pointer;transition:transform .1s;color:var(--txt3)}
+.star.filled{color:var(--amber)}
+.star:hover{transform:scale(1.15)}
+.reviews-list{display:flex;flex-direction:column;gap:10px;max-height:200px;overflow-y:auto;margin-top:12px}
+.rev-item{background:var(--ink3);border:1px solid var(--edge);border-radius:9px;padding:12px}
+.rev-header{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.rev-stars{font-size:10px}
+.rev-author{font-family:var(--mono);font-size:9px;color:var(--txt3)}
+.rev-time{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-left:auto}
+.rev-text{font-size:12px;color:var(--txt2);line-height:1.6}
+
+/* 12. WEBHOOK CONFIG */
+.wh-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.wh-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--ink3);border:1px solid var(--edge);border-radius:9px;font-size:12px}
+.wh-url{flex:1;font-family:var(--mono);font-size:11px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wh-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.wh-status.ok{background:var(--green);animation:blink 3s infinite}
+.wh-status.fail{background:var(--red)}
+.wh-test{font-family:var(--mono);font-size:9px;padding:3px 8px;border:1px solid var(--edge2);border-radius:4px;background:none;color:var(--txt3);cursor:pointer;transition:all .15s;flex-shrink:0}
+.wh-test:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* 13. EXPORT */
+.export-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.exp-btn{background:var(--ink3);border:1px solid var(--edge);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.exp-btn:hover{border-color:var(--edge2);transform:translateY(-2px)}
+.exp-icon{font-size:22px;margin-bottom:6px}
+.exp-label{font-family:var(--display);font-size:12px;font-weight:700}
+.exp-desc{font-size:10px;color:var(--txt3);margin-top:2px;font-family:var(--mono)}
+
+/* 14. PROMPT STUDIO */
+.prompt-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ptag{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:5px;border:1px solid var(--edge2);color:var(--txt3);cursor:pointer;transition:all .15s;background:none}
+.ptag:hover,.ptag.on{border-color:rgba(0,212,255,.3);color:var(--cyan);background:rgba(0,212,255,.07)}
+.tone-meter{height:4px;background:var(--edge);border-radius:2px;overflow:hidden;margin-bottom:14px}
+.tone-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--cyan),var(--purple));transition:width .4s}
+
+/* 15. REFERRAL PROGRAM */
+.ref-card{background:linear-gradient(135deg,rgba(255,107,53,.06),rgba(155,109,255,.06));border:1px solid rgba(255,107,53,.2);border-radius:14px;padding:20px;margin-bottom:16px}
+.ref-code{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--locus);letter-spacing:2px;margin-bottom:8px}
+.ref-stats{display:flex;gap:20px;margin-top:12px}
+.ref-stat{text-align:center}
+.ref-stat-val{font-family:var(--display);font-size:18px;font-weight:800;color:var(--txt)}
+.ref-stat-lbl{font-size:10px;color:var(--txt3);font-family:var(--mono)}
+
+/* 16. AGENT SCHEDULER */
+.sched-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px}
+.sched-day{background:var(--ink3);border:1px solid var(--edge);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;transition:all .15s;min-height:52px}
+.sched-day:hover{border-color:var(--edge2)}
+.sched-day.has-job{border-color:rgba(0,212,255,.25);background:rgba(0,212,255,.04)}
+.sched-day.today-sched{border-color:rgba(255,107,53,.35);background:rgba(255,107,53,.06)}
+.sched-day-name{font-family:var(--mono);font-size:8px;color:var(--txt3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+.sched-day-num{font-family:var(--display);font-size:14px;font-weight:700;color:var(--txt2)}
+.sched-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);margin:3px auto 0;opacity:0}
+.sched-day.has-job .sched-dot{opacity:1}
+
+/* 17. MULTI-AGENT PIPELINE BUILDER */
+.pipeline-builder{display:flex;gap:10px;align-items:center;overflow-x:auto;padding:16px;background:var(--ink3);border:1px solid var(--edge);border-radius:14px;margin-top:16px}
+.pipe-node{background:var(--ink2);border:1px solid var(--edge);border-radius:10px;padding:12px 16px;text-align:center;flex-shrink:0;min-width:110px;cursor:pointer;transition:all .2s;position:relative}
+.pipe-node:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px)}
+.pipe-node.active-node{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.06)}
+.pipe-node-em{font-size:20px;margin-bottom:5px}
+.pipe-node-name{font-size:11px;font-weight:600;font-family:var(--display)}
+.pipe-node-role{font-size:9px;color:var(--txt3);font-family:var(--mono)}
+.pipe-arrow{font-size:16px;color:var(--txt3);flex-shrink:0}
+.pipe-add{background:none;border:1px dashed var(--edge2);border-radius:10px;padding:12px 16px;min-width:80px;cursor:pointer;font-size:20px;color:var(--txt3);transition:all .2s;flex-shrink:0}
+.pipe-add:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* 18. SMART NOTIFICATIONS */
+.notif-list{display:flex;flex-direction:column;gap:7px;max-height:300px;overflow-y:auto}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:var(--ink2);border:1px solid var(--edge);border-radius:10px;cursor:pointer;transition:all .15s}
+.notif-item:hover{border-color:var(--edge2)}
+.notif-item.unread{border-left:2px solid var(--locus)}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.notif-dot.locus-dot{background:var(--locus)}
+.notif-dot.cyan-dot{background:var(--cyan)}
+.notif-dot.green-dot{background:var(--green)}
+.notif-dot.amber-dot{background:var(--amber)}
+.notif-text{font-size:12px;line-height:1.5}
+.notif-time{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-top:3px}
+.notif-badge{background:var(--locus);color:#fff;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0}
+
+/* 19. A/B TESTING PANEL */
+.ab-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.ab-variant{background:var(--ink3);border:1px solid var(--edge);border-radius:12px;padding:16px}
+.ab-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.ab-label.a{color:var(--cyan)}.ab-label.b{color:var(--purple)}
+.ab-result{font-size:12px;color:var(--txt2);line-height:1.6;min-height:60px;font-family:var(--mono);font-size:11px}
+.ab-metric{display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--txt3)}
+.ab-winner-badge{background:rgba(0,229,160,.09);color:var(--green);border:1px solid rgba(0,229,160,.2);font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;margin-left:6px}
+
+/* 20. MISSION CONTROL DASHBOARD */
+.mission-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.mission-stat{background:var(--ink2);border:1px solid var(--edge);border-radius:12px;padding:16px;text-align:center;transition:all .2s}
+.mission-stat:hover{transform:translateY(-2px);border-color:var(--edge2)}
+.mission-stat-icon{font-size:22px;margin-bottom:7px}
+.mission-stat-val{font-family:var(--display);font-size:22px;font-weight:800;margin-bottom:2px}
+.mission-stat-lbl{font-size:10px;color:var(--txt3);font-family:var(--mono)}
+.health-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.health-item{background:var(--ink3);border:1px solid var(--edge);border-radius:10px;padding:12px;display:flex;align-items:center;gap:9px}
+.health-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.health-info{flex:1}
+.health-name{font-size:12px;font-weight:500}
+.health-latency{font-family:var(--mono);font-size:9px;color:var(--txt3)}
+.health-bar{width:50px;background:var(--edge);border-radius:2px;height:3px;overflow:hidden;flex-shrink:0}
+.health-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .5s}
+
+/* LOCUS SECTION HEADER */
+.locus-header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.locus-icon{font-size:20px}
+
+/* TAB SYSTEM */
+.tabs{display:flex;gap:4px;background:var(--ink3);border:1px solid var(--edge);border-radius:10px;padding:4px;margin-bottom:18px}
+.tab{flex:1;padding:7px 10px;border-radius:7px;border:none;background:none;color:var(--txt3);font-size:12px;font-family:var(--mono);cursor:pointer;transition:all .15s;text-align:center}
+.tab:hover{color:var(--txt)}
+.tab.on{background:var(--ink2);color:var(--cyan);border:1px solid var(--edge2)}
+.tab-panel{display:none}.tab-panel.on{display:block}
+
+/* SECTION HEADER WITH LOCUS */
+.sec-with-locus{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:44px}
+.locus-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:8px 14px;font-family:var(--mono);font-size:11px;color:var(--locus)}
+
+/* SECTION DIVIDER */
+.sdiv{height:1px;background:linear-gradient(90deg,transparent,var(--edge2),transparent);margin:0}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Nexus<span>.AI</span></div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="goto('#hero')">Home</button>
+    <button class="nav-link" onclick="goto('#sec-jobs')">Jobs</button>
+    <button class="nav-link" onclick="goto('#sec-agents')">Agents</button>
+    <button class="nav-link" onclick="goto('#sec-chat')">Chat</button>
+    <button class="nav-link" onclick="goto('#sec-analytics')">Analytics</button>
+    <button class="nav-link" onclick="goto('#sec-battle')">Battle</button>
+    <button class="nav-link" onclick="goto('#sec-mission')">Mission</button>
+    <button class="nav-link" onclick="goto('#sec-gamify')">Rewards</button>
+  </div>
+  <div class="nav-right">
+    <div class="locus-badge">Locus Paygametic</div>
+    <div class="bal-chip" onclick="loadBalance()"><span id="balLbl">Loading…</span></div>
+    <button class="btn-launch" onclick="goto('#sec-jobs')">Submit Job ↗</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hbg"></div>
+  <div class="hgrid"></div>
+  <div class="hc">
+    <div class="hero-eye">⚡ LOCUS PAYGAMETIC HACKATHON · LIVE</div>
+    <h1>Autonomous<br><span class="c">Agent</span> <span class="g">Economy</span></h1>
+    <p class="hero-desc">NexusAI runs multi-agent AI pipelines with real-time USDC settlement via Locus. Submit jobs, earn XP, climb leaderboards, and get paid — on Base L2.</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="goto('#sec-jobs')">Launch Agent ⚡</button>
+      <button class="btn-locus" onclick="goto('#sec-gamify')">Earn Rewards 🏆</button>
+      <button class="btn-s" onclick="goto('#sec-chat')">Talk to AI →</button>
+    </div>
+    <div class="hero-nums">
+      <div><div class="hn-val"><span id="hs-j">0</span></div><div class="hn-lbl">Jobs Run</div></div>
+      <div><div class="hn-val">$<span id="hs-r">0.00</span></div><div class="hn-lbl">USDC Settled</div></div>
+      <div><div class="hn-val"><span id="hs-xp">0</span></div><div class="hn-lbl">XP Earned</div></div>
+      <div><div class="hn-val"><span id="hs-streak">0</span>🔥</div><div class="hn-lbl">Day Streak</div></div>
+    </div>
+  </div>
+  <div class="hvisual"><canvas id="sph"></canvas></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker"><div class="ttrack" id="ttrack"></div></div>
+
+<!-- FEATURES -->
+<div class="sec" id="sec-features">
+<div class="wrap">
+  <div class="sec-lbl rev">Platform Capabilities</div>
+  <h2 class="sec-h rev d1">Everything you need to<br>run an AI agent economy</h2>
+  <p class="sec-sub rev d2">From task dispatch to USDC settlement, gamified rewards, leaderboards, and live analytics — NexusAI handles the full autonomous workflow.</p>
+  <div class="feat-grid">
+    <div class="fc rev d1"><div class="fc-icon">🤖</div><div class="fc-ttl">Multi-Agent Pipeline</div><div class="fc-txt">CEO → Research → Writer → Audit. Four specialist agents working in sequence with full context passing.</div><div class="fc-badge">LIVE</div></div>
+    <div class="fc rev d2"><div class="fc-icon locus-ic">💸</div><div class="fc-ttl">Locus USDC Payments</div><div class="fc-txt">Every job settles in USDC on Base L2 via Locus checkout. Real payments, real receipts, zero friction.</div><div class="fc-badge new">LOCUS</div></div>
+    <div class="fc rev d3"><div class="fc-icon">🏆</div><div class="fc-ttl">Paygametic Rewards</div><div class="fc-txt">Earn XP for every job, unlock badges, maintain streaks, climb the leaderboard. Redeem rewards with NEXUS points.</div><div class="fc-badge new">NEW</div></div>
+    <div class="fc rev d1"><div class="fc-icon">⚔️</div><div class="fc-ttl">Battle Arena</div><div class="fc-txt">Writer vs Research. CEO Agent judges. Real-time scoring, winner declared, results exported.</div><div class="fc-badge">LIVE</div></div>
+    <div class="fc rev d2"><div class="fc-icon">📊</div><div class="fc-ttl">Live Analytics</div><div class="fc-txt">Real-time revenue tracking, agent performance metrics, job pipeline visualization, and revenue charts.</div><div class="fc-badge">LIVE</div></div>
+    <div class="fc rev d3"><div class="fc-icon">🔨</div><div class="fc-ttl">Pipeline Builder</div><div class="fc-txt">Drag-and-drop custom multi-agent workflows. Connect agents in any order, configure routing logic.</div><div class="fc-badge new">NEW</div></div>
+    <div class="fc rev d1"><div class="fc-icon locus-ic">🎯</div><div class="fc-ttl">Bulk Job Queue</div><div class="fc-txt">Queue up to 10 jobs, process in parallel, track each with live status. Batch Locus settlement.</div><div class="fc-badge new">NEW</div></div>
+    <div class="fc rev d2"><div class="fc-icon">⏰</div><div class="fc-ttl">Agent Scheduler</div><div class="fc-txt">Schedule recurring jobs by day of week. Auto-dispatch with time-based Locus payment triggers.</div><div class="fc-badge new">NEW</div></div>
+    <div class="fc rev d3"><div class="fc-icon">🔔</div><div class="fc-ttl">Smart Notifications</div><div class="fc-txt">Real-time alerts for job completion, payment confirmations, streak milestones, and leaderboard rank changes.</div><div class="fc-badge new">NEW</div></div>
+  </div>
+</div>
+</div>
+
+<!-- JOBS -->
+<div class="band" id="sec-jobs">
+<div class="wrap">
+<div class="sec">
+  <div class="sec-with-locus rev">
+    <div>
+      <div class="sec-lbl">AI Job Dispatch</div>
+      <h2 class="sec-h">Submit a job.<br>Get paid results.</h2>
+      <p class="sec-sub">18 task types. Real USDC payments via Locus. Multi-agent pipeline with XP rewards on every completion.</p>
+    </div>
+    <div class="locus-tag">⚡ Powered by Locus Paygametic</div>
+  </div>
+  <div class="pipe">
+    <div class="pn active" id="p1"><span class="nn">01</span>CONFIGURE</div>
+    <div class="pn" id="p2"><span class="nn">02</span>DISPATCH</div>
+    <div class="pn" id="p3"><span class="nn">03</span>AI GENERATE</div>
+    <div class="pn" id="p4"><span class="nn">04</span>AUDIT</div>
+    <div class="pn" id="p5"><span class="nn">05</span>PAY &amp; DELIVER</div>
+  </div>
+  <div class="job-layout">
+    <div class="jform">
+      <div style="margin-bottom:18px">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">
+          <span style="font-family:var(--display);font-size:16px;font-weight:700">New Job</span>
+          <span id="xp-preview" style="font-family:var(--mono);font-size:10px;color:var(--locus);background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);padding:2px 8px;border-radius:4px">+10 XP</span>
+        </div>
+        <div style="font-size:12px;color:var(--txt3)">Each completed job earns XP and contributes to your streak.</div>
+      </div>
+      <div class="fgrp">
+        <label class="fl">Task Type</label>
+        <select id="tt" onchange="onTT()">
+          <option value="">— Select task type —</option>
+          <option>Write a product description for</option>
+          <option>Write a marketing tagline for</option>
+          <option>Write a business plan summary for</option>
+          <option>Write social media posts for</option>
+          <option>Analyze the market opportunity for</option>
+          <option>Write a cold email campaign for</option>
+          <option>Write an investor pitch for</option>
+          <option>Write SEO blog post ideas for</option>
+          <option>Write a press release for</option>
+          <option>Write a competitive analysis for</option>
+          <option>Write a landing page copy for</option>
+          <option>Write customer personas for</option>
+          <option>Write a fundraising strategy for</option>
+          <option>Write interview questions for hiring</option>
+          <option>Write a viral tweet thread about</option>
+          <option>Write a SWOT analysis for</option>
+          <option>Write an onboarding email sequence for</option>
+          <option>Roast my business idea:</option>
+        </select>
+      </div>
+      <!-- SMART PRICING DISPLAY (Feature 9) -->
+      <div class="price-display rev" id="priceDisplay" style="display:none">
+        <div class="price-icon">💰</div>
+        <div class="price-info">
+          <div class="price-val" id="priceVal">$0.10</div>
+          <div class="price-label">SUGGESTED LOCUS PRICE · USDC</div>
+        </div>
+        <div class="price-boost" id="priceBoost">2x XP ACTIVE</div>
+      </div>
+      <div class="fgrp">
+        <label class="fl">Job Description</label>
+        <textarea id="jt" placeholder="Describe what you need in detail…"></textarea>
+      </div>
+      <div class="frow">
+        <div class="fgrp" style="margin-bottom:0">
+          <label class="fl">USDC Amount <span id="phint" style="color:var(--amber)">$0.10</span></label>
+          <input type="number" id="ja" value="0.10" min="0.01" step="0.01"/>
+        </div>
+        <div class="fgrp" style="margin-bottom:0">
+          <label class="fl">Payer Email</label>
+          <input type="email" id="pe" placeholder="you@email.com"/>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:9px;align-items:center">
+        <button class="btn-sub" id="subBtn" onclick="submitJob()" style="flex:1">⚡ Deploy &amp; Pay</button>
+        <button class="btn-clr" onclick="clearJob()">✕</button>
+        <button class="btn-g" onclick="addToQueue()" title="Add to bulk queue">+ Queue</button>
+      </div>
+      <button class="btn-locus-sub" id="bulkBtn" onclick="goto('#sec-bulk')" style="margin-top:8px">📦 Bulk Queue (0 jobs)</button>
+    </div>
+    <div class="jresult" id="jres">
+      <div class="rc"><div class="empty-rc"><div class="big">⚡</div><div style="font-family:var(--display);font-size:15px;font-weight:700;color:var(--txt2)">Ready to deploy</div><div style="font-size:12px">Select a task type, write your brief, and deploy.</div></div></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- AGENTS -->
+<div class="sec" id="sec-agents">
+<div class="wrap">
+  <div class="sec-lbl rev">The Agent Network</div>
+  <h2 class="sec-h rev d1">Four specialists.<br>One unified economy.</h2>
+  <p class="sec-sub rev d2">Each agent has a distinct role, memory, and personality — built on Llama 3.3 70B with custom system prompts and Locus payment integration.</p>
+  <div class="ag-grid" id="agGrid"></div>
+</div>
+</div>
+
+<!-- CHAT -->
+<div class="band" id="sec-chat">
+<div class="wrap">
+<div class="sec">
+  <div class="sec-lbl rev">Direct Agent Chat</div>
+  <h2 class="sec-h rev d1">Talk to any agent.<br>In real time.</h2>
+  <p class="sec-sub rev d2">Full conversational memory. Switch agents instantly. Each message earns micro-XP toward your Locus rewards.</p>
+  <div class="chat-lay rev d2">
+    <div class="chat-sb">
+      <div class="csb-title">Agent Network</div>
+      <div id="cagList"></div>
+    </div>
+    <div class="chat-main">
+      <div class="ctop">
+        <div class="mav" id="ctAv" style="background:rgba(0,212,255,.07)">🤖</div>
+        <div>
+          <div class="ctname" id="ctName">CEO Agent</div>
+          <div class="ctsub" id="ctSub">Strategic Command · Llama 3.3 70B · NexusAI</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <span id="chat-xp-tag" style="font-family:var(--mono);font-size:9px;color:var(--locus);background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.18);padding:2px 7px;border-radius:3px">+1 XP/MSG</span>
+          <button class="btn-g" onclick="clearChat()">Clear</button>
+          <button class="btn-g" onclick="exportChat()">Export</button>
+        </div>
+      </div>
+      <div class="cmsgs" id="cmsgs"></div>
+      <div class="cinp-row">
+        <textarea class="cinp" id="cinp" placeholder="Message the agent… (Enter to send)" rows="1" onkeydown="ck(event)" oninput="ar(this)"></textarea>
+        <button class="btn-send" id="sendB" onclick="sendMsg()">Send ↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="sec" id="sec-analytics">
+<div class="wrap">
+  <div class="sec-lbl rev">Live Analytics</div>
+  <h2 class="sec-h rev d1">Every dollar tracked.<br>Every job logged.</h2>
+  <p class="sec-sub rev d2">Real-time metrics from the NexusAI agent network, powered by Locus settlement data.</p>
+  <div class="an-grid rev d2">
+    <div>
+      <div class="an-stats">
+        <div class="sc" style="--sg:rgba(0,212,255,.06)"><div class="slbl">Total Jobs</div><div class="sval cy" id="an-j">0</div><div class="ssub">All time</div></div>
+        <div class="sc" style="--sg:rgba(0,229,160,.05)"><div class="slbl">Revenue</div><div class="sval gr" id="an-r">$0.00</div><div class="ssub">USDC via Locus</div></div>
+        <div class="sc" style="--sg:rgba(245,166,35,.05)"><div class="slbl">Avg/Job</div><div class="sval am" id="an-a">$0.000</div><div class="ssub">Per task</div></div>
+        <div class="sc" style="--sg:rgba(255,107,53,.05)"><div class="slbl">Top Agent</div><div class="sval lo" id="an-t">—</div><div class="ssub">By jobs</div></div>
+      </div>
+      <div class="cc">
+        <div class="ct">Revenue Chart (last 8 jobs)</div>
+        <div class="minichart" id="mchart"><div style="width:100%;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:11px;font-family:var(--mono)">No revenue yet</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="cc"><div class="ct">By Task Type</div><div class="bar-list" id="tBars"><div style="color:var(--txt3);font-size:11px;font-family:var(--mono)">No data yet</div></div></div>
+      <div class="cc"><div class="ct">By Agent</div><div class="bar-list" id="aBars"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- HISTORY -->
+<div class="sec" id="sec-history" style="padding-top:0">
+<div class="wrap">
+  <div class="sec-lbl rev">Transaction Ledger</div>
+  <h2 class="sec-h rev d1">Every job. On record.</h2>
+  <div class="htop rev d2">
+    <span id="hcount" style="font-family:var(--mono);font-size:11px;color:var(--txt3)">0 jobs</span>
+    <button class="fb on" onclick="hFilter('all',this)">ALL</button>
+    <button class="fb" onclick="hFilter('completed',this)">COMPLETED</button>
+    <button class="fb" onclick="hFilter('paid',this)">PAID</button>
+    <button class="fb" onclick="hFilter('pending_payment',this)">PENDING</button>
+    <div style="margin-left:auto;display:flex;gap:7px">
+      <button class="btn-g" onclick="exportHistory('csv')">↓ CSV</button>
+      <button class="btn-g" onclick="exportHistory('json')">↓ JSON</button>
+    </div>
+  </div>
+  <div style="overflow-x:auto;background:var(--ink2);border:1px solid var(--edge);border-radius:14px;margin-top:10px" class="rev d2">
+    <table class="htable">
+      <thead><tr><th>ID</th><th>Task Type</th><th>Description</th><th>Amount</th><th>Tokens</th><th>Status</th><th>XP</th><th>Time</th><th>Actions</th></tr></thead>
+      <tbody id="hbody"><tr><td colspan="9" class="etbl">No jobs yet — submit one above</td></tr></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- BATTLE ARENA -->
+<div class="sec" id="sec-battle" style="padding-top:0;padding-bottom:96px">
+<div class="wrap">
+  <div class="sec-lbl rev">Battle Arena</div>
+  <h2 class="sec-h rev d1">Agent vs Agent.<br>CEO decides.</h2>
+  <p class="sec-sub rev d2">Two agents compete on the same prompt. CEO Agent judges and delivers a scored verdict. Winner earns bonus XP payout via Locus.</p>
+  <div class="bwrap rev d2">
+    <div class="bctrl">
+      <div class="frow">
+        <div class="fgrp" style="margin-bottom:0">
+          <label class="fl">Battle Topic</label>
+          <input type="text" id="btopic" placeholder="e.g. Write a pitch for an AI compliance tool"/>
+        </div>
+        <div class="fgrp" style="margin-bottom:0">
+          <label class="fl">Judgment Criteria</label>
+          <select id="bcrit">
+            <option value="creativity and originality">Creativity &amp; Originality</option>
+            <option value="clarity and persuasiveness">Clarity &amp; Persuasiveness</option>
+            <option value="strategic depth and business value">Strategic Depth</option>
+            <option value="tone and audience fit">Tone &amp; Audience Fit</option>
+            <option value="overall quality and completeness">Overall Quality</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn-sub" id="bBtn" onclick="battle()" style="max-width:200px;padding:11px">⚔️ START BATTLE</button>
+        <span class="badge bl">+25 XP Battle Bonus</span>
+        <span id="bStat" style="font-family:var(--mono);font-size:11px;color:var(--txt3)"></span>
+      </div>
+      <div class="barena">
+        <div class="bf" id="bfA">
+          <div class="bfem">✍️</div>
+          <div class="bfn">Writer Agent</div>
+          <div class="bfr">Content Specialist</div>
+          <div class="bfsc cy2" id="bsA">—</div>
+          <div class="sbar"><div class="sf" id="bbA" style="width:0%;background:var(--cyan)"></div></div>
+          <div style="font-size:11px;color:var(--txt3)">Quality Score</div>
+        </div>
+        <div class="bvs">
+          <div class="vstext">VS</div>
+          <span class="badge ba">LIVE</span>
+        </div>
+        <div class="bf" id="bfB">
+          <div class="bfem">🔍</div>
+          <div class="bfn">Research Agent</div>
+          <div class="bfr">Data Specialist</div>
+          <div class="bfsc pu2" id="bsB">—</div>
+          <div class="sbar"><div class="sf" id="bbB" style="width:0%;background:var(--purple)"></div></div>
+          <div style="font-size:11px;color:var(--txt3)">Quality Score</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="bres" id="bres" style="display:none">
+        <div class="brc"><div class="brh">✍️ Writer Output</div><div class="brb"><p id="brA"></p></div></div>
+        <div class="brc"><div class="brh">🔍 Research Output</div><div class="brb"><p id="brB"></p></div></div>
+        <div class="brc vcard"><div class="brh">🏆 CEO Verdict</div><div class="brb"><p id="brV"></p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sdiv"></div>
+
+<!-- ═══════════════════════ NEW FEATURES ═══════════════════════ -->
+
+<!-- MISSION CONTROL (Feature 20) -->
+<div class="sec" id="sec-mission">
+<div class="wrap">
+  <div class="sec-lbl rev">Mission Control</div>
+  <h2 class="sec-h rev d1">System health.<br>All agents online.</h2>
+  <p class="sec-sub rev d2">Real-time system status, agent health monitoring, Locus payment gateway status, and Base L2 network metrics.</p>
+  <div class="mission-grid rev d1">
+    <div class="mission-stat"><div class="mission-stat-icon">🌐</div><div class="mission-stat-val" style="color:var(--green)" id="mc-uptime">99.9%</div><div class="mission-stat-lbl">UPTIME</div></div>
+    <div class="mission-stat"><div class="mission-stat-icon">⚡</div><div class="mission-stat-val" style="color:var(--cyan)" id="mc-latency">124ms</div><div class="mission-stat-lbl">AVG LATENCY</div></div>
+    <div class="mission-stat"><div class="mission-stat-icon">💸</div><div class="mission-stat-val" style="color:var(--locus)" id="mc-settled">$0.00</div><div class="mission-stat-lbl">LOCUS SETTLED</div></div>
+    <div class="mission-stat"><div class="mission-stat-icon">🔥</div><div class="mission-stat-val" style="color:var(--amber)" id="mc-streak">0</div><div class="mission-stat-lbl">JOB STREAK</div></div>
+  </div>
+  <div class="health-grid rev d2">
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 3s infinite"></div><div class="health-info"><div class="health-name">Locus Gateway</div><div class="health-latency">beta-api.paywithlocus.com · 45ms</div></div><div class="health-bar"><div class="health-bar-fill" style="width:95%"></div></div></div>
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 3s infinite"></div><div class="health-info"><div class="health-name">Groq / Llama 3.3</div><div class="health-latency">api.groq.com · 180ms</div></div><div class="health-bar"><div class="health-bar-fill" style="width:88%"></div></div></div>
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 3s infinite"></div><div class="health-info"><div class="health-name">Base L2 Network</div><div class="health-latency">mainnet · 0.001 gwei</div></div><div class="health-bar"><div class="health-bar-fill" style="width:100%"></div></div></div>
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 2s infinite"></div><div class="health-info"><div class="health-name">CEO Agent</div><div class="health-latency">Llama 3.3 70B · Online</div></div><div class="health-bar"><div class="health-bar-fill" style="width:100%"></div></div></div>
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 2s infinite"></div><div class="health-info"><div class="health-name">Research Agent</div><div class="health-latency">Llama 3.3 70B · Online</div></div><div class="health-bar"><div class="health-bar-fill" style="width:100%"></div></div></div>
+    <div class="health-item"><div class="health-dot" style="background:var(--green);animation:blink 2s infinite"></div><div class="health-info"><div class="health-name">USDC Settlement</div><div class="health-latency">Base L2 · ~2s finality</div></div><div class="health-bar"><div class="health-bar-fill" style="width:100%"></div></div></div>
+  </div>
+</div>
+</div>
+
+<!-- GAMIFICATION HUB (Features 3, 6, 15) -->
+<div class="band" id="sec-gamify">
+<div class="wrap">
+<div class="sec">
+  <div class="sec-lbl rev">Locus Paygametic Hub</div>
+  <h2 class="sec-h rev d1">Earn. Streak. Win.<br>Get paid in USDC.</h2>
+  <p class="sec-sub rev d2">The full Locus Paygametic experience — XP, badges, streaks, referrals, and USDC rewards for every action on the platform.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:44px" class="rev d1">
+    <!-- XP & BADGES -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--locus);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">⚡ XP &amp; PROGRESSION</div>
+      <div class="xp-bar-wrap">
+        <div class="xp-header">
+          <div>
+            <div class="xp-level" id="xp-level-display">Lv.1</div>
+            <div class="xp-title" id="xp-title-display">AI Recruit</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--locus)" id="xp-total">0 XP</div>
+            <div style="font-size:10px;color:var(--txt3);font-family:var(--mono)" id="xp-next">100 XP to next level</div>
+          </div>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        <div class="xp-meta"><span id="xp-curr">0</span><span id="xp-max">100</span></div>
+      </div>
+      <div class="badge-grid">
+        <div class="bitem earned" title="First Job"><div class="bitem-icon">🚀</div><div class="bitem-name">LAUNCH</div></div>
+        <div class="bitem" id="b-streak" title="7-Day Streak"><div class="bitem-icon bitem-locked">🔥</div><div class="bitem-name">STREAK</div></div>
+        <div class="bitem" id="b-whale" title="$1 USDC spent"><div class="bitem-icon bitem-locked">🐋</div><div class="bitem-name">WHALE</div></div>
+        <div class="bitem" id="b-battle" title="Win a battle"><div class="bitem-icon bitem-locked">⚔️</div><div class="bitem-name">WARRIOR</div></div>
+        <div class="bitem" id="b-pipeline" title="Run full pipeline"><div class="bitem-icon bitem-locked">🔗</div><div class="bitem-name">PIPELINE</div></div>
+        <div class="bitem" id="b-referral" title="First referral"><div class="bitem-icon bitem-locked">🤝</div><div class="bitem-name">REFERRER</div></div>
+        <div class="bitem" id="b-10jobs" title="10 jobs complete"><div class="bitem-icon bitem-locked">💎</div><div class="bitem-name">DIAMOND</div></div>
+        <div class="bitem" id="b-maxlevel" title="Reach Level 10"><div class="bitem-icon bitem-locked">👑</div><div class="bitem-name">LEGEND</div></div>
+      </div>
+    </div>
+    <!-- STREAK TRACKER -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--locus);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">🔥 DAILY STREAK</div>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-family:var(--display);font-size:28px;font-weight:800;color:var(--locus)" id="streak-count">0 🔥</div>
+            <div style="font-size:11px;color:var(--txt3)">Day Streak</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:13px;color:var(--amber)" id="streak-bonus">+0% XP Bonus</div>
+            <div style="font-size:10px;color:var(--txt3)">Streak Multiplier</div>
+          </div>
+        </div>
+        <div class="streak-display" id="streak-days"></div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:10px">Submit a job daily to maintain your streak. At 7 days, earn the 🔥 STREAK badge and 2x XP for 24h.</div>
+      </div>
+      <!-- REFERRAL (Feature 15) -->
+      <div style="margin-top:16px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--locus);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">🤝 REFERRAL PROGRAM</div>
+        <div class="ref-card">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:6px;font-family:var(--mono)">YOUR REFERRAL CODE</div>
+          <div class="ref-code" id="ref-code">NEXUS-XXXX</div>
+          <div style="font-size:12px;color:var(--txt2)">Share your code. Each successful referral earns you <strong style="color:var(--locus)">$0.10 USDC</strong> and 50 XP.</div>
+          <div class="ref-stats">
+            <div class="ref-stat"><div class="ref-stat-val" id="ref-count">0</div><div class="ref-stat-lbl">REFERRALS</div></div>
+            <div class="ref-stat"><div class="ref-stat-val" style="color:var(--green)" id="ref-earned">$0.00</div><div class="ref-stat-lbl">EARNED</div></div>
+            <div class="ref-stat"><div class="ref-stat-val" style="color:var(--locus)" id="ref-xp">0</div><div class="ref-stat-lbl">XP BONUS</div></div>
+          </div>
+        </div>
+        <button class="btn-sub" onclick="copyRef()" style="font-size:12px;padding:10px">Copy Referral Link</button>
+      </div>
+    </div>
+    <!-- REWARD SHOP (Feature 7) -->
+    <div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--locus);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">🛍 REWARD SHOP</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--txt3);margin-bottom:12px">Your points: <span style="color:var(--locus);font-weight:700" id="points-display">0 pts</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="shop-card" style="padding:14px;text-align:left;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">⚡</div>
+          <div style="flex:1">
+            <div style="font-family:var(--display);font-size:13px;font-weight:700">2x XP Boost (1hr)</div>
+            <div style="font-size:10px;color:var(--txt3)">Double XP on all jobs for 60 minutes</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--locus);margin-bottom:4px">50 pts</div>
+            <button class="btn-redeem" onclick="redeemReward('boost',50)" style="padding:4px 10px">Redeem</button>
+          </div>
+        </div>
+        <div class="shop-card" style="padding:14px;text-align:left;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">💸</div>
+          <div style="flex:1">
+            <div style="font-family:var(--display);font-size:13px;font-weight:700">$0.05 USDC Cashback</div>
+            <div style="font-size:10px;color:var(--txt3)">Redeemable on next Locus payment</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--locus);margin-bottom:4px">100 pts</div>
+            <button class="btn-redeem" onclick="redeemReward('usdc',100)" style="padding:4px 10px">Redeem</button>
+          </div>
+        </div>
+        <div class="shop-card" style="padding:14px;text-align:left;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">🎯</div>
+          <div style="flex:1">
+            <div style="font-family:var(--display);font-size:13px;font-weight:700">Free Premium Job</div>
+            <div style="font-size:10px;color:var(--txt3)">One $0.15 task, fully comped</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--locus);margin-bottom:4px">200 pts</div>
+            <button class="btn-redeem" onclick="redeemReward('free',200)" style="padding:4px 10px">Redeem</button>
+          </div>
+        </div>
+        <div class="shop-card" style="padding:14px;text-align:left;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">👑</div>
+          <div style="flex:1">
+            <div style="font-family:var(--display);font-size:13px;font-weight:700">Legend Status (7 days)</div>
+            <div style="font-size:10px;color:var(--txt3)">Gold border, leaderboard crown, +3x XP</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:var(--mono);font-size:12px;color:var(--locus);margin-bottom:4px">500 pts</div>
+            <button class="btn-redeem" onclick="redeemReward('legend',500)" style="padding:4px 10px">Redeem</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- LEADERBOARD (Feature 1) -->
+<div class="sec" id="sec-leaderboard">
+<div class="wrap">
+  <div class="sec-lbl rev">Paygametic Leaderboard</div>
+  <h2 class="sec-h rev d1">Top earners.<br>Ranked by Locus volume.</h2>
+  <p class="sec-sub rev d2">Live rankings updated every 30 seconds. Top 3 get USDC bonus payouts from the Locus prize pool at end of hackathon.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:44px" class="rev d1">
+    <div>
+      <div class="cc">
+        <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Top Players · XP Ranking</span>
+          <span style="color:var(--locus);font-size:10px" id="lb-updated">Live</span>
+        </div>
+        <table class="lb-table" id="lbTable">
+          <tr><td class="lb-rank gold">1</td><td><div class="lb-name" style="color:var(--locus)">You</div><div style="font-size:10px;color:var(--txt3);font-family:var(--mono)" id="lb-your-score">0 XP · 0 jobs</div><div class="lb-bar" style="margin-top:4px"><div class="lb-fill" id="lb-your-fill" style="width:0%"></div></div></td><td class="lb-score" style="color:var(--locus)" id="lb-your-val">0</td></tr>
+          <tr><td class="lb-rank silver">2</td><td><div class="lb-name">agent_maverick</div><div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">247 XP · 12 jobs</div><div class="lb-bar" style="margin-top:4px"><div class="lb-fill" style="width:72%"></div></div></td><td class="lb-score">247</td></tr>
+          <tr><td class="lb-rank bronze">3</td><td><div class="lb-name">nexus_runner</div><div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">189 XP · 9 jobs</div><div class="lb-bar" style="margin-top:4px"><div class="lb-fill" style="width:55%"></div></div></td><td class="lb-score">189</td></tr>
+          <tr><td class="lb-rank" style="color:var(--txt3)">4</td><td><div class="lb-name">pay_wizard_88</div><div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">134 XP · 7 jobs</div></td><td class="lb-score" style="color:var(--txt2)">134</td></tr>
+          <tr><td class="lb-rank" style="color:var(--txt3)">5</td><td><div class="lb-name">locus_maximalist</div><div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">98 XP · 5 jobs</div></td><td class="lb-score" style="color:var(--txt2)">98</td></tr>
+        </table>
+        <div style="margin-top:14px;display:flex;gap:9px">
+          <div style="flex:1;background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.15);border-radius:9px;padding:10px;text-align:center">
+            <div style="font-size:16px;margin-bottom:3px">🥇</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--amber)">$1.00 USDC</div>
+            <div style="font-size:9px;color:var(--txt3)">1st Prize</div>
+          </div>
+          <div style="flex:1;background:rgba(192,192,192,.04);border:1px solid rgba(192,192,192,.12);border-radius:9px;padding:10px;text-align:center">
+            <div style="font-size:16px;margin-bottom:3px">🥈</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--txt2)">$0.50 USDC</div>
+            <div style="font-size:9px;color:var(--txt3)">2nd Prize</div>
+          </div>
+          <div style="flex:1;background:rgba(205,127,50,.04);border:1px solid rgba(205,127,50,.12);border-radius:9px;padding:10px;text-align:center">
+            <div style="font-size:16px;margin-bottom:3px">🥉</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--locus)">$0.25 USDC</div>
+            <div style="font-size:9px;color:var(--txt3)">3rd Prize</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- LIVE FEED (Feature 8) -->
+    <div>
+      <div class="cc">
+        <div class="ct">Live Activity Feed</div>
+        <div class="live-feed" id="liveFeed">
+          <div class="feed-item"><div class="feed-icon">🚀</div><div class="feed-info"><div class="feed-msg">Platform ready. Submit your first job to appear on the leaderboard.</div><div class="feed-time">Just now</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BULK JOB QUEUE (Feature 10) -->
+<div class="band" id="sec-bulk">
+<div class="wrap">
+<div class="sec">
+  <div class="sec-lbl rev">Bulk Job Queue</div>
+  <h2 class="sec-h rev d1">Queue 10 jobs.<br>One Locus payment.</h2>
+  <p class="sec-sub rev d2">Build a batch of jobs, configure each, then process them all with a single Locus checkout. Save time, earn batch XP bonus.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px" class="rev d1">
+    <div>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:20px">
+        <div style="font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:14px">Job Queue <span id="queue-count-badge" style="font-family:var(--mono);font-size:11px;color:var(--locus);background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.2);padding:2px 8px;border-radius:4px">0/10</span></div>
+        <div class="queue-list" id="queueList">
+          <div style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:11px;padding:20px">Queue is empty. Use "+ Queue" on the Job form above.</div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:9px;align-items:center">
+          <div style="flex:1;font-family:var(--mono);font-size:12px;color:var(--amber)">Total: $<span id="queue-total">0.00</span> USDC</div>
+          <button class="btn-sub" id="runQueueBtn" onclick="runQueue()" disabled style="max-width:180px;padding:10px;font-size:12px">⚡ Run All Jobs</button>
+          <button class="btn-clr" onclick="clearQueue()" style="padding:10px">Clear</button>
+        </div>
+        <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--locus)">Batch bonus: +5 XP per job when running 3+ jobs</div>
+      </div>
+    </div>
+    <!-- A/B TESTING PANEL (Feature 19) -->
+    <div>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:20px">
+        <div style="font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px">A/B Test Runner</div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:14px">Run the same prompt through two agents simultaneously. Compare outputs and pick the winner.</div>
+        <div class="fgrp">
+          <label class="fl">Test Prompt</label>
+          <textarea id="ab-prompt" placeholder="Enter prompt to A/B test…" style="min-height:70px"></textarea>
+        </div>
+        <div class="frow">
+          <div class="fgrp" style="margin-bottom:0">
+            <label class="fl">Agent A</label>
+            <select id="ab-a"><option value="writer">Writer Agent</option><option value="research">Research Agent</option><option value="audit">Audit Agent</option><option value="ceo">CEO Agent</option></select>
+          </div>
+          <div class="fgrp" style="margin-bottom:0">
+            <label class="fl">Agent B</label>
+            <select id="ab-b"><option value="research">Research Agent</option><option value="writer">Writer Agent</option><option value="audit">Audit Agent</option><option value="ceo">CEO Agent</option></select>
+          </div>
+        </div>
+        <button class="btn-sub" id="abBtn" onclick="runAB()" style="margin-top:14px;padding:11px">🔬 Run A/B Test</button>
+        <div class="ab-layout" id="ab-results" style="display:none">
+          <div class="ab-variant">
+            <div class="ab-label a">⬡ Variant A <span id="ab-a-label"></span></div>
+            <div class="ab-result" id="ab-a-result">—</div>
+            <div class="ab-metric"><span id="ab-a-tokens">—</span><span id="ab-a-win"></span></div>
+          </div>
+          <div class="ab-variant">
+            <div class="ab-label b">⬡ Variant B <span id="ab-b-label"></span></div>
+            <div class="ab-result" id="ab-b-result">—</div>
+            <div class="ab-metric"><span id="ab-b-tokens">—</span><span id="ab-b-win"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- PIPELINE BUILDER + SCHEDULER (Features 17, 16) -->
+<div class="sec" id="sec-pipeline">
+<div class="wrap">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start">
+    <!-- PIPELINE BUILDER -->
+    <div class="rev d1">
+      <div class="sec-lbl">Multi-Agent Pipeline Builder</div>
+      <h3 style="font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:10px">Design your workflow.</h3>
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:18px">Drag agents into your custom pipeline. Each node passes its output to the next.</p>
+      <div class="pipeline-builder" id="pipelineBuilder">
+        <div class="pipe-node active-node" data-agent="ceo" onclick="selectPipeNode(this)">
+          <div class="pipe-node-em">🤖</div>
+          <div class="pipe-node-name">CEO</div>
+          <div class="pipe-node-role">Command</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" data-agent="research" onclick="selectPipeNode(this)">
+          <div class="pipe-node-em">🔍</div>
+          <div class="pipe-node-name">Research</div>
+          <div class="pipe-node-role">Data</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" data-agent="writer" onclick="selectPipeNode(this)">
+          <div class="pipe-node-em">✍️</div>
+          <div class="pipe-node-name">Writer</div>
+          <div class="pipe-node-role">Content</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node" data-agent="audit" onclick="selectPipeNode(this)">
+          <div class="pipe-node-em">✅</div>
+          <div class="pipe-node-name">Audit</div>
+          <div class="pipe-node-role">QA</div>
+        </div>
+        <button class="pipe-add" onclick="resetPipeline()" title="Reset pipeline">↺</button>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+        <button class="btn-sub" id="runPipeBtn" onclick="runCustomPipeline()" style="max-width:200px;padding:10px;font-size:12px">🔗 Run Pipeline</button>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">+20 XP for full pipeline run</span>
+      </div>
+      <div class="fgrp" style="margin-top:16px">
+        <label class="fl">Pipeline Prompt</label>
+        <textarea id="pipe-prompt" placeholder="Enter your pipeline brief…" style="min-height:70px"></textarea>
+      </div>
+      <div id="pipe-result" style="margin-top:12px"></div>
+    </div>
+    <!-- SCHEDULER (Feature 16) -->
+    <div class="rev d2">
+      <div class="sec-lbl">Agent Scheduler</div>
+      <h3 style="font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:10px">Set it. Forget it.</h3>
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:18px">Schedule recurring jobs by day. Auto-dispatch with Locus time-locked payments.</p>
+      <div class="sched-grid" id="schedGrid"></div>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:12px;padding:16px;margin-top:8px">
+        <div class="frow">
+          <div class="fgrp" style="margin-bottom:0">
+            <label class="fl">Recurring Task</label>
+            <select id="sched-task">
+              <option value="">— Select —</option>
+              <option>Write a viral tweet thread about</option>
+              <option>Write SEO blog post ideas for</option>
+              <option>Analyze the market opportunity for</option>
+              <option>Write a SWOT analysis for</option>
+            </select>
+          </div>
+          <div class="fgrp" style="margin-bottom:0">
+            <label class="fl">Day of Week</label>
+            <select id="sched-day">
+              <option value="0">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </div>
+        </div>
+        <input type="text" id="sched-brief" placeholder="Topic or brief…" style="margin-top:10px"/>
+        <button class="btn-sub" onclick="addSchedule()" style="margin-top:10px;padding:10px;font-size:12px">+ Schedule Job</button>
+      </div>
+      <div id="sched-list" style="margin-top:10px;display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- LOCUS PAYMENT PANEL + NOTIFICATIONS (Features 2, 18) -->
+<div class="band" id="sec-payments">
+<div class="wrap">
+<div class="sec">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+    <!-- LOCUS PAYMENT PANEL -->
+    <div class="rev d1">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--locus);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">💸 LOCUS PAYMENT PANEL</div>
+      <div class="pay-panel">
+        <div class="pay-status">
+          <div class="pay-dot active"></div>
+          <div class="pay-info">
+            <div class="pay-label">Gateway Status</div>
+            <div class="pay-value">Locus Beta · Connected</div>
+          </div>
+        </div>
+        <div class="pay-grid">
+          <div class="pay-card">
+            <div class="pay-card-lbl">Balance</div>
+            <div class="pay-card-val" style="color:var(--green)" id="pay-balance">—</div>
+          </div>
+          <div class="pay-card">
+            <div class="pay-card-lbl">Total Paid</div>
+            <div class="pay-card-val" style="color:var(--locus)" id="pay-total">$0.00</div>
+          </div>
+          <div class="pay-card">
+            <div class="pay-card-lbl">Transactions</div>
+            <div class="pay-card-val" style="color:var(--cyan)" id="pay-txcount">0</div>
+          </div>
+          <div class="pay-card">
+            <div class="pay-card-lbl">Network</div>
+            <div class="pay-card-val" style="color:var(--purple);font-size:14px">Base L2</div>
+          </div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Recent Transactions</div>
+        <div class="txlist" id="txList">
+          <div style="color:var(--txt3);font-size:11px;font-family:var(--mono);text-align:center;padding:16px">No transactions yet</div>
+        </div>
+      </div>
+    </div>
+    <!-- AGENT RATINGS (Feature 11) -->
+    <div class="rev d2">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">⭐ AGENT RATINGS</div>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px">
+        <div class="fgrp">
+          <label class="fl">Rate Agent</label>
+          <select id="rate-agent-sel">
+            <option value="ceo">CEO Agent</option>
+            <option value="research">Research Agent</option>
+            <option value="writer">Writer Agent</option>
+            <option value="audit">Audit Agent</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px">YOUR RATING</div>
+          <div class="rating-stars" id="ratingStars">
+            <span class="star" onclick="setRating(1)">★</span>
+            <span class="star" onclick="setRating(2)">★</span>
+            <span class="star" onclick="setRating(3)">★</span>
+            <span class="star" onclick="setRating(4)">★</span>
+            <span class="star" onclick="setRating(5)">★</span>
+          </div>
+        </div>
+        <div class="fgrp" style="margin-bottom:8px">
+          <textarea id="review-text" placeholder="Write your review…" style="min-height:60px"></textarea>
+        </div>
+        <button class="btn-sub" onclick="submitReview()" style="padding:9px;font-size:12px">Submit Review (+5 XP)</button>
+        <div class="reviews-list" id="reviewsList">
+          <div style="color:var(--txt3);font-size:11px;font-family:var(--mono);text-align:center;padding:12px">No reviews yet</div>
+        </div>
+      </div>
+    </div>
+    <!-- NOTIFICATIONS (Feature 18) -->
+    <div class="rev d3">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">🔔 NOTIFICATIONS <span id="notif-count-badge" style="background:var(--locus);color:#fff;padding:1px 6px;border-radius:3px;font-size:9px;margin-left:4px">0</span></div>
+      <div style="display:flex;gap:7px;margin-bottom:12px">
+        <button class="btn-g" onclick="markAllRead()">Mark all read</button>
+        <button class="btn-g" onclick="clearNotifs()">Clear all</button>
+      </div>
+      <div class="notif-list" id="notifList">
+        <div class="notif-item">
+          <div class="notif-dot locus-dot"></div>
+          <div style="flex:1">
+            <div class="notif-text">Welcome to NexusAI Paygametic! Submit your first job to start earning XP and climbing the leaderboard.</div>
+            <div class="notif-time">Just now</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- PROMPT STUDIO + WEBHOOKS + EXPORT (Features 14, 12, 13) -->
+<div class="sec" id="sec-studio">
+<div class="wrap">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px">
+    <!-- PROMPT STUDIO -->
+    <div class="rev d1">
+      <div class="sec-lbl">Prompt Studio</div>
+      <h3 style="font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:-1px;margin-bottom:10px">Craft perfect prompts.</h3>
+      <p style="font-size:13px;color:var(--txt2);margin-bottom:16px">Tag-based prompt builder with tone control, context injection, and one-click deploy to any agent.</p>
+      <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1.5px;margin-bottom:8px">TONE</div>
+        <div class="prompt-tags">
+          <button class="ptag on" onclick="toggleTag(this,'Professional')">Professional</button>
+          <button class="ptag" onclick="toggleTag(this,'Casual')">Casual</button>
+          <button class="ptag" onclick="toggleTag(this,'Persuasive')">Persuasive</button>
+          <button class="ptag" onclick="toggleTag(this,'Technical')">Technical</button>
+          <button class="ptag" onclick="toggleTag(this,'Creative')">Creative</button>
+          <button class="ptag" onclick="toggleTag(this,'Concise')">Concise</button>
+        </div>
+        <div class="tone-meter"><div class="tone-fill" id="toneFill" style="width:40%"></div></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--txt3);letter-spacing:1.5px;margin-bottom:8px">CONTEXT MODIFIERS</div>
+        <div class="prompt-tags">
+          <button class="ptag" onclick="toggleTag(this,'B2B')">B2B</button>
+          <button class="ptag" onclick="toggleTag(this,'Startup')">Startup</button>
+          <button class="ptag" onclick="toggleTag(this,'Enterprise')">Enterprise</button>
+          <button class="ptag" onclick="toggleTag(this,'DeFi')">DeFi</button>
+          <button class="ptag" onclick="toggleTag(this,'AI/ML')">AI/ML</button>
+          <button class="ptag" onclick="toggleTag(this,'SaaS')">SaaS</button>
+        </div>
+        <div class="fgrp" style="margin-top:12px">
+          <label class="fl">Prompt</label>
+          <textarea id="studio-prompt" placeholder="Your prompt here…" style="min-height:80px"></textarea>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <select id="studio-agent" style="flex:1">
+            <option value="ceo">CEO Agent</option>
+            <option value="research">Research Agent</option>
+            <option value="writer">Writer Agent</option>
+            <option value="audit">Audit Agent</option>
+          </select>
+          <button class="btn-sub" onclick="runStudio()" style="max-width:140px;padding:10px;font-size:12px">Deploy ⚡</button>
+        </div>
+        <div id="studio-result" style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--txt2);line-height:1.7;max-height:140px;overflow-y:auto;display:none;background:var(--ink3);border:1px solid var(--edge);border-radius:8px;padding:12px"></div>
+      </div>
+    </div>
+    <!-- WEBHOOKS + EXPORT -->
+    <div>
+      <!-- WEBHOOKS (Feature 12) -->
+      <div class="rev d2" style="margin-bottom:24px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">🔗 WEBHOOK ENDPOINTS</div>
+        <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px">
+          <div class="wh-list" id="whList">
+            <div class="wh-item">
+              <div class="wh-status ok"></div>
+              <div class="wh-url">https://your-app.com/webhooks/nexusai</div>
+              <button class="wh-test" onclick="testWebhook(0)">TEST</button>
+              <button class="btn-remove" onclick="deleteWebhook(0)">×</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:9px">
+            <input type="text" id="wh-input" placeholder="https://your-endpoint.com/webhook" style="flex:1"/>
+            <button class="btn-sub" onclick="addWebhook()" style="max-width:100px;padding:10px;font-size:12px">+ Add</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--txt3)">Webhooks fire on: job.complete, payment.confirmed, battle.result, xp.levelup</div>
+        </div>
+      </div>
+      <!-- EXPORT (Feature 13) -->
+      <div class="rev d3">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">📦 EXPORT DATA</div>
+        <div style="background:var(--ink2);border:1px solid var(--edge);border-radius:14px;padding:18px">
+          <div class="export-grid">
+            <div class="exp-btn" onclick="exportHistory('csv')"><div class="exp-icon">📊</div><div class="exp-label">CSV Export</div><div class="exp-desc">Job history</div></div>
+            <div class="exp-btn" onclick="exportHistory('json')"><div class="exp-icon">🗂️</div><div class="exp-label">JSON Export</div><div class="exp-desc">Full data</div></div>
+            <div class="exp-btn" onclick="exportMetrics()"><div class="exp-icon">📈</div><div class="exp-label">Metrics</div><div class="exp-desc">Analytics</div></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:9px">
+            <div style="flex:1;background:var(--ink3);border:1px solid var(--edge);border-radius:9px;padding:12px;text-align:center">
+              <div style="font-family:var(--display);font-size:16px;font-weight:700;color:var(--txt)" id="exp-jobs-count">0</div>
+              <div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">EXPORTABLE JOBS</div>
+            </div>
+            <div style="flex:1;background:var(--ink3);border:1px solid var(--edge);border-radius:9px;padding:12px;text-align:center">
+              <div style="font-family:var(--display);font-size:16px;font-weight:700;color:var(--locus)" id="exp-revenue">$0.00</div>
+              <div style="font-size:10px;color:var(--txt3);font-family:var(--mono)">TOTAL REVENUE</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="finner">
+    <div class="fgrid">
+      <div>
+        <div class="fbrand">Nexus<span>.AI</span></div>
+        <div class="fdesc">Autonomous agent economy powered by Llama 3.3, Locus Paygametic payments, and Base L2. Built for the Locus Hackathon 2025.</div>
+        <div style="margin-top:14px"><span class="locus-badge" style="display:inline-flex">Locus Paygametic Hackathon</span></div>
+      </div>
+      <div>
+        <div class="fct">Platform</div>
+        <span class="fl2" onclick="goto('#sec-jobs')">Submit Job</span>
+        <span class="fl2" onclick="goto('#sec-agents')">Agent Network</span>
+        <span class="fl2" onclick="goto('#sec-chat')">Live Chat</span>
+        <span class="fl2" onclick="goto('#sec-battle')">Battle Arena</span>
+        <span class="fl2" onclick="goto('#sec-bulk')">Bulk Queue</span>
+      </div>
+      <div>
+        <div class="fct">Paygametic</div>
+        <span class="fl2" onclick="goto('#sec-gamify')">XP &amp; Badges</span>
+        <span class="fl2" onclick="goto('#sec-leaderboard')">Leaderboard</span>
+        <span class="fl2" onclick="goto('#sec-gamify')">Reward Shop</span>
+        <span class="fl2" onclick="goto('#sec-payments')">Payment Panel</span>
+        <span class="fl2" onclick="goto('#sec-studio')">Prompt Studio</span>
+      </div>
+      <div>
+        <div class="fct">Status</div>
+        <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--green);padding:3px 0"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:blink 2s infinite"></span>All Systems Online</div>
+        <div style="font-size:12px;color:var(--txt3);margin-top:7px;font-family:var(--mono)" id="uptd">Uptime: —</div>
+        <div style="font-size:12px;color:var(--txt3);margin-top:3px;font-family:var(--mono)">Network: Base L2</div>
+        <div style="font-size:12px;color:var(--locus);margin-top:3px;font-family:var(--mono)">Locus: Connected</div>
+      </div>
+    </div>
+    <div class="fbottom">
+      <span>© 2025 NexusAI · Autonomous Agent Economy</span>
+      <span>Powered by Locus Paygametic · Base L2 · USDC</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+// ══════════════════════════════ SPHERE
+(function(){
+  const cv=document.getElementById('sph'),ctx=cv.getContext('2d');
+  const W=580,H=580,R=195,CX=W/2,CY=H/2,N=260;
+  cv.width=W;cv.height=H;
+  const pts=[];
+  for(let i=0;i<N;i++){
+    const t=Math.acos(1-2*(i+.5)/N);
+    const p=Math.PI*(1+Math.sqrt(5))*i;
+    pts.push({ox:Math.sin(t)*Math.cos(p),oy:Math.sin(t)*Math.sin(p),oz:Math.cos(t),ph:Math.random()*Math.PI*2});
+  }
+  let rx=0,ry=0,vx=.003,vy=.007,mx=0,my=0,over=false,T=0;
+  cv.parentElement.addEventListener('mousemove',e=>{
+    const r=cv.getBoundingClientRect();
+    mx=(e.clientX-r.left)/r.width*2-1;my=(e.clientY-r.top)/r.height*2-1;over=true;
+  });
+  cv.parentElement.addEventListener('mouseleave',()=>{over=false;});
+  function rot(ox,oy,oz,rx,ry){
+    let x=ox*Math.cos(ry)+oz*Math.sin(ry),y=oy,z=-ox*Math.sin(ry)+oz*Math.cos(ry);
+    return{x,y:y*Math.cos(rx)-z*Math.sin(rx),z:y*Math.sin(rx)+z*Math.cos(rx)};
+  }
+  function proj(x,y,z){const f=800,zo=600,s=f/(f+z*R+zo);return{sx:CX+x*R*s,sy:CY+y*R*s,s};}
+  function frame(){
+    ctx.clearRect(0,0,W,H);T+=.012;
+    if(over){vy+=(mx*.006-vy)*.08;vx+=(my*.004-vx)*.08;}
+    else{vy+=(.007-vy)*.02;vx+=(.003-vx)*.02;}
+    rx+=vx;ry+=vy;
+    const proj2=pts.map(d=>{
+      const{x,y,z}=rot(d.ox,d.oy,d.oz,rx,ry);
+      const{sx,sy}=proj(x,y,z);
+      const depth=(z+1)/2,vis=z>-.08,pulse=.5+.5*Math.sin(T*1.5+d.ph);
+      return{sx,sy,depth,vis,pulse,z};
+    });
+    for(let i=0;i<proj2.length;i++){
+      const a=proj2[i];if(!a.vis||a.depth<.28)continue;
+      for(let j=i+1;j<proj2.length;j++){
+        const b=proj2[j];if(!b.vis||b.depth<.28)continue;
+        const dx=a.sx-b.sx,dy=a.sy-b.sy,d=Math.sqrt(dx*dx+dy*dy);
+        if(d>52)continue;
+        const al=(1-d/52)*Math.min(a.depth,b.depth)*.32;
+        ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);
+        ctx.strokeStyle=`rgba(0,212,255,${al.toFixed(3)})`;ctx.lineWidth=.5;ctx.stroke();
+      }
+    }
+    [...proj2].sort((a,b)=>a.z-b.z).forEach(p=>{
+      if(!p.vis)return;
+      const r=p.depth<.5?1.1:1.1+p.depth*2.1;
+      const al=p.depth<.12?0:(.12+p.depth*.88)*(.55+.45*p.pulse);
+      if(p.depth>.52){
+        const g=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*3.5);
+        g.addColorStop(0,`rgba(0,212,255,${(al*.55).toFixed(3)})`);g.addColorStop(1,'rgba(0,212,255,0)');
+        ctx.beginPath();ctx.arc(p.sx,p.sy,r*3.5,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      }
+      ctx.beginPath();ctx.arc(p.sx,p.sy,r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,212,255,${al.toFixed(3)})`;ctx.fill();
+    });
+    const rg=ctx.createRadialGradient(CX,CY,R*.8,CX,CY,R*1.06);
+    rg.addColorStop(0,'rgba(0,212,255,0)');rg.addColorStop(.6,'rgba(0,212,255,0.022)');rg.addColorStop(1,'rgba(0,212,255,0)');
+    ctx.beginPath();ctx.arc(CX,CY,R*1.06,0,Math.PI*2);ctx.fillStyle=rg;ctx.fill();
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ══════════════════════════════ TICKER
+(function(){
+  const items=[
+    {s:'NEXUS/USDC',v:'1.0000',c:'+0.00%',u:true},{s:'ETH/USDC',v:'3,412',c:'+2.14%',u:true},
+    {s:'BTC/USDC',v:'67,840',c:'+1.83%',u:true},{s:'BASE GAS',v:'0.001 gwei',c:'-14%',u:false},
+    {s:'USDC/USD',v:'1.0001',c:'+0.01%',u:true},{s:'LOCUS NET',v:'ONLINE',c:'',u:true},
+    {s:'AI JOBS',v:'0 today',c:'',u:true},{s:'HACKATHON',v:'LIVE',c:'',u:true},
+    {s:'XP POOL',v:'∞',c:'',u:true},{s:'LOCUS PAY',v:'ACTIVE',c:'',u:true},
+  ];
+  const all=[...items,...items];
+  document.getElementById('ttrack').innerHTML=all.map(t=>`
+    <div class="titem"><span style="color:var(--txt)">${t.s}</span><span>${t.v}</span>${t.c?`<span class="${t.u?'up':'dn'}">${t.c}</span>`:''}</div>
+  `).join('');
+})();
+
+// ══════════════════════════════ NAV
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>50);
+  const ids=['hero','sec-jobs','sec-agents','sec-chat','sec-analytics','sec-battle','sec-mission','sec-gamify'];
+  let cur=0;
+  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el&&scrollY>=el.offsetTop-130)cur=i;});
+  document.querySelectorAll('.nav-link').forEach((l,i)=>l.classList.toggle('active',i===cur));
+});
+function goto(sel){const el=document.querySelector(sel);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+
+// ══════════════════════════════ REVEAL
+const ro=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis');});},{threshold:.1});
+document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+
+// ══════════════════════════════ FEAT CARD GLOW
+document.querySelectorAll('.fc').forEach(c=>{
+  c.addEventListener('mousemove',e=>{
+    const r=c.getBoundingClientRect();
+    c.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    c.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+// ══════════════════════════════ AGENT CONFIG
+const AG={
+  ceo:{name:'CEO Agent',role:'Strategic Command',em:'🤖',color:'var(--cyan)',border:'rgba(0,212,255,.22)',bg:'rgba(0,212,255,.07)',glow:'rgba(0,212,255,.26)',desc:'Commands the full pipeline. Delivers executive-level strategy, synthesizes outputs, and provides final decisions with one actionable next step.'},
+  research:{name:'Research Agent',role:'Data & Intelligence',em:'🔍',color:'var(--purple)',border:'rgba(155,109,255,.22)',bg:'rgba(155,109,255,.07)',glow:'rgba(155,109,255,.26)',desc:'Mines data for patterns and rigorous insights. Produces analyses with TAM/SAM estimates, competitive landscapes, and confidence-rated findings.'},
+  writer:{name:'Writer Agent',role:'Content Generation',em:'✍️',color:'var(--green)',border:'rgba(0,229,160,.22)',bg:'rgba(0,229,160,.07)',glow:'rgba(0,229,160,.26)',desc:'Craft viral copy, campaigns, pitch decks, and content that converts. Optimized for every platform from LinkedIn to TikTok.'},
+  audit:{name:'Audit Agent',role:'QA & Review',em:'✅',color:'var(--amber)',border:'rgba(245,166,35,.22)',bg:'rgba(245,166,35,.07)',glow:'rgba(245,166,35,.26)',desc:'Reviews outputs critically. Scores work 1–10 and delivers prioritized improvement recommendations with clear issues and concrete fixes.'},
+};
+let curAg='ceo',logs={},jobStore=[],txHistory=[];
+
+// ══════════════════════════════ GAMIFICATION STATE
+let xpState={total:0,level:1,titles:['AI Recruit','Agent Trainee','Junior Analyst','Senior Analyst','Agent Pro','Market Maker','Pipeline Master','Revenue Titan','Locus Legend','NexusAI Sovereign'],streakDays:0,points:0,boostActive:false,boostExpiry:0};
+const XP_PER_LEVEL=[0,100,250,500,900,1400,2100,3000,4200,6000];
+let jobQueue=[];
+let schedules=[];
+let notifications=[];
+let reviews={ceo:[],research:[],writer:[],audit:[]};
+let webhooks=[{url:'https://your-app.com/webhooks/nexusai',active:true}];
+let activePromptTags=new Set(['Professional']);
+
+// ══════════════════════════════ XP SYSTEM
+function addXP(amount,reason){
+  if(xpState.boostActive&&Date.now()<xpState.boostExpiry)amount*=2;
+  xpState.total+=amount;
+  xpState.points+=Math.floor(amount/2);
+  updateXPDisplay();
+  addFeedItem('⚡',`+${amount} XP earned: ${reason}`,null);
+  addNotification(`+${amount} XP: ${reason}`,'locus-dot');
+  updateHeroNums();
+  document.getElementById('hs-xp').textContent=xpState.total;
+}
+function updateXPDisplay(){
+  let lv=1;
+  for(let i=0;i<XP_PER_LEVEL.length;i++)if(xpState.total>=XP_PER_LEVEL[i])lv=i+1;
+  xpState.level=Math.min(lv,10);
+  const nextXP=XP_PER_LEVEL[xpState.level]||XP_PER_LEVEL[XP_PER_LEVEL.length-1];
+  const prevXP=XP_PER_LEVEL[xpState.level-1]||0;
+  const pct=Math.min(100,((xpState.total-prevXP)/(nextXP-prevXP))*100)||0;
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-total').textContent=xpState.total+' XP';
+  document.getElementById('xp-level-display').textContent='Lv.'+xpState.level;
+  document.getElementById('xp-title-display').textContent=xpState.titles[xpState.level-1]||'Sovereign';
+  document.getElementById('xp-curr').textContent=xpState.total;
+  document.getElementById('xp-max').textContent=nextXP;
+  document.getElementById('xp-next').textContent=(nextXP-xpState.total)+' XP to next level';
+  document.getElementById('points-display').textContent=xpState.points+' pts';
+  // Update leaderboard YOUR score
+  document.getElementById('lb-your-score').textContent=xpState.total+' XP · '+jobStore.length+' jobs';
+  document.getElementById('lb-your-val').textContent=xpState.total;
+  const maxLB=340;
+  document.getElementById('lb-your-fill').style.width=Math.min(100,(xpState.total/maxLB*100))+'%';
+}
+
+// ══════════════════════════════ STREAK
+function initStreak(){
+  const days=['S','M','T','W','T','F','S'];
+  const today=new Date().getDay();
+  let html='';
+  for(let i=0;i<7;i++){
+    const isToday=i===today;
+    const isActive=i<=(today-7+xpState.streakDays)%7&&xpState.streakDays>0;
+    html+=`<div class="streak-day${isToday?' today-sched':isActive?' active':''}" title="${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]}"><div style="font-size:9px;color:var(--txt3);font-family:var(--mono)">${days[i]}</div></div>`;
+  }
+  document.getElementById('streak-days').innerHTML=html;
+  document.getElementById('streak-count').textContent=xpState.streakDays+'🔥';
+  document.getElementById('streak-bonus').textContent='+'+Math.min(xpState.streakDays*10,100)+'% XP Bonus';
+  document.getElementById('hs-streak').textContent=xpState.streakDays;
+  document.getElementById('mc-streak').textContent=xpState.streakDays;
+}
+
+// ══════════════════════════════ REFERRAL
+function initReferral(){
+  const code='NEXUS-'+Math.random().toString(36).substring(2,6).toUpperCase();
+  document.getElementById('ref-code').textContent=code;
+}
+function copyRef(){
+  const code=document.getElementById('ref-code').textContent;
+  cp('https://nexusai.app/?ref='+code);
+  toast('Referral link copied!','locus');
+}
+
+// ══════════════════════════════ NOTIFICATIONS
+function addNotification(text,dotClass='cyan-dot',badge=false){
+  notifications.unshift({text,dotClass,badge,time:'Just now',unread:true});
+  renderNotifications();
+}
+// Override static webhook HTML on init - renderWebhooks() in load handles it
+function renderNotifications(){
+  const unread=notifications.filter(n=>n.unread).length;
+  document.getElementById('notif-count-badge').textContent=unread;
+  if(!notifications.length){document.getElementById('notifList').innerHTML='<div style="color:var(--txt3);font-size:11px;font-family:var(--mono);padding:16px;text-align:center">No notifications</div>';return;}
+  document.getElementById('notifList').innerHTML=notifications.slice(0,12).map((n,i)=>`
+    <div class="notif-item ${n.unread?'unread':''}" onclick="readNotif(${i})">
+      <div class="notif-dot ${n.dotClass}"></div>
+      <div style="flex:1"><div class="notif-text">${esc(n.text)}</div><div class="notif-time">${n.time}</div></div>
+      ${n.badge?'<span class="notif-badge">NEW</span>':''}
+    </div>
+  `).join('');
+}
+function readNotif(i){if(notifications[i])notifications[i].unread=false;renderNotifications();}
+function markAllRead(){notifications.forEach(n=>n.unread=false);renderNotifications();}
+function clearNotifs(){notifications=[];renderNotifications();}
+
+// ══════════════════════════════ LIVE FEED
+function addFeedItem(icon,msg,amount){
+  const feed=document.getElementById('liveFeed');
+  const t=new Date().toLocaleTimeString();
+  const item=document.createElement('div');
+  item.className='feed-item';
+  item.innerHTML=`<div class="feed-icon">${icon}</div><div class="feed-info"><div class="feed-msg">${esc(msg)}</div><div class="feed-time">${t}</div></div>${amount?`<div class="feed-amount">${amount}</div>`:''}`;
+  feed.prepend(item);
+  while(feed.children.length>20)feed.removeChild(feed.lastChild);
+}
+
+// ══════════════════════════════ TRANSACTIONS
+function addTx(icon,name,amount,credit){
+  const tx={icon,name,amount,credit,time:new Date().toLocaleTimeString()};
+  txHistory.unshift(tx);
+  renderTxList();
+  document.getElementById('pay-txcount').textContent=txHistory.length;
+  const total=txHistory.filter(t=>!t.credit).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+  document.getElementById('pay-total').textContent='$'+total.toFixed(2);
+  document.getElementById('mc-settled').textContent='$'+total.toFixed(2);
+}
+function renderTxList(){
+  if(!txHistory.length){document.getElementById('txList').innerHTML='<div style="color:var(--txt3);font-size:11px;font-family:var(--mono);text-align:center;padding:16px">No transactions yet</div>';return;}
+  document.getElementById('txList').innerHTML=txHistory.slice(0,8).map(t=>`
+    <div class="txrow">
+      <div class="txrow-icon">${t.icon}</div>
+      <div class="txrow-info"><div class="txrow-name">${esc(t.name)}</div><div class="txrow-time">${t.time}</div></div>
+      <div class="txrow-amount ${t.credit?'credit':'debit'}">${t.credit?'+':'-'}$${t.amount}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════ REWARDS SHOP
+function redeemReward(type,cost){
+  if(xpState.points<cost){toast('Not enough points! Need '+cost+' pts','err');return;}
+  xpState.points-=cost;
+  document.getElementById('points-display').textContent=xpState.points+' pts';
+  if(type==='boost'){xpState.boostActive=true;xpState.boostExpiry=Date.now()+3600000;document.getElementById('priceBoost').style.display='block';toast('2x XP Boost active for 1 hour! ⚡','locus');}
+  else if(type==='usdc'){toast('$0.05 USDC cashback applied to next payment!','ok');}
+  else if(type==='free'){toast('Free premium job unlocked! Submit with $0 cost.','ok');}
+  else if(type==='legend'){toast('👑 Legend Status activated for 7 days!','locus');}
+  addNotification(`Redeemed reward: ${type} (-${cost} pts)`,'amber-dot');
+  addFeedItem('🛍','Reward redeemed: '+type,null);
+}
+
+// ══════════════════════════════ RENDER AGENTS GRID
+function renderAgGrid(){
+  document.getElementById('agGrid').innerHTML=Object.entries(AG).map(([id,a],i)=>`
+    <div class="ag rev d${i+1}" style="--ac:${a.color};--ab:${a.border};--abg:${a.bg};--agl:${a.glow}" onclick="pickAgent('${id}');goto('#sec-chat')">
+      <div class="ag-av"><span style="font-size:22px">${a.em}</span></div>
+      <div class="ag-name">${a.name}</div>
+      <div class="ag-role" style="color:${a.color}">${a.role}</div>
+      <div class="ag-desc">${a.desc}</div>
+      <div class="ag-mets">
+        <div class="ag-m"><strong id="amj-${id}">0</strong>Jobs</div>
+        <div class="ag-m"><strong>800</strong>Tokens</div>
+        <div class="ag-m" style="color:var(--green)"><strong>●</strong>Live</div>
+      </div>
+      <button class="ag-cb" style="border-color:${a.border};color:${a.color}">Chat with ${a.name.split(' ')[0]} →</button>
+    </div>
+  `).join('');
+  document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+}
+
+// ══════════════════════════════ CHAT
+function renderCagList(){
+  document.getElementById('cagList').innerHTML=Object.entries(AG).map(([id,a])=>`
+    <button class="cab ${id===curAg?'on':''}" onclick="pickAgent('${id}')">
+      <div class="cav" style="background:${a.bg}">${a.em}</div>
+      <div class="ci"><div class="cn">${a.name}</div><div class="cr">${a.role}</div></div>
+      <span class="cbadge">●</span>
+    </button>
+  `).join('');
+}
+function pickAgent(id){
+  curAg=id;const a=AG[id];
+  document.getElementById('ctAv').textContent=a.em;
+  document.getElementById('ctAv').style.background=a.bg;
+  document.getElementById('ctName').textContent=a.name;
+  document.getElementById('ctSub').textContent=a.role+' · Llama 3.3 70B · NexusAI';
+  renderCagList();
+  if(!logs[id]){
+    logs[id]=[];
+    const g={
+      ceo:"Welcome. I'm your CEO Agent — the strategic command layer of NexusAI. I can help you submit jobs, analyze pipeline performance, or discuss autonomous AI strategy. What's the priority?",
+      research:"Research Agent online. I specialize in market intelligence, competitive landscapes, and data-driven insights. Give me a market or trend to investigate. What are we researching?",
+      writer:"Writer Agent ready. I craft copy that converts — product descriptions, viral threads, cold email sequences, pitch decks. Give me a brief. What are we creating?",
+      audit:"Audit Agent active. Paste any content, idea, or strategy and I'll evaluate it critically: strengths, weaknesses, improvements, and a score out of 10. What needs reviewing?",
+    };
+    pushMsg('agent',g[id]||'How can I help?');
+  }
+  drawMsgs();
+}
+function pushMsg(role,text){
+  if(!logs[curAg])logs[curAg]=[];
+  logs[curAg].push({role,text,t:new Date().toLocaleTimeString()});
+  drawMsgs();
+}
+function drawMsgs(){
+  const el=document.getElementById('cmsgs'),a=AG[curAg];
+  const msgs=logs[curAg]||[];
+  el.innerHTML=msgs.map(m=>`
+    <div class="mw ${m.role}">
+      <div class="mav" style="background:${m.role==='agent'?a.bg:'rgba(255,255,255,.05)'}">${m.role==='agent'?a.em:'👤'}</div>
+      <div>
+        <div class="mbub">${esc(m.text)}</div>
+        <div class="mtime">${m.t}</div>
+      </div>
+    </div>
+  `).join('');
+  el.scrollTop=el.scrollHeight;
+}
+async function sendMsg(){
+  const inp=document.getElementById('cinp');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';inp.style.height='38px';
+  pushMsg('user',msg);
+  const a=AG[curAg];
+  const el=document.getElementById('cmsgs');
+  const tid='ty_'+Date.now();
+  el.innerHTML+=`<div id="${tid}" class="mw agent"><div class="mav" style="background:${a.bg}">${a.em}</div><div><div class="tybub"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
+  el.scrollTop=el.scrollHeight;
+  document.getElementById('sendB').disabled=true;
+  try{
+    const r=await api('/api/chat',{message:msg,agentId:curAg,sessionId:'main'});
+    document.getElementById(tid)?.remove();
+    if(r.error)throw new Error(r.error);
+    pushMsg('agent',r.reply);
+    const jel=document.getElementById('amj-'+curAg);
+    if(jel)jel.textContent=parseInt(jel.textContent||0)+1;
+    addXP(1,'Chat message sent');
+  }catch(e){document.getElementById(tid)?.remove();pushMsg('agent','⚠ Error: '+e.message);toast(e.message,'err');}
+  finally{document.getElementById('sendB').disabled=false;}
+}
+function clearChat(){
+  fetch('/api/chat/'+curAg+'?sessionId=main',{method:'DELETE'}).catch(()=>{});
+  logs[curAg]=[];pickAgent(curAg);toast('Chat cleared','info');
+}
+function exportChat(){
+  const msgs=logs[curAg]||[];
+  if(!msgs.length){toast('No messages to export','err');return;}
+  const txt=msgs.map(m=>`[${m.t}] ${m.role==='user'?'You':AG[curAg]?.name}: ${m.text}`).join('\n\n');
+  dlFile(txt,'chat-'+curAg+'.txt','text/plain');
+  toast('Chat exported','ok');
+}
+function ck(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+
+// ══════════════════════════════ JOB FORM
+const PRICES={'Write a product description for':.05,'Write a marketing tagline for':.05,'Write social media posts for':.08,'Write a press release for':.10,'Write a landing page copy for':.15,'Write a viral tweet thread about':.05,'Write an onboarding email sequence for':.12,'Write a business plan summary for':.10,'Analyze the market opportunity for':.15,'Write a competitive analysis for':.12,'Write a SWOT analysis for':.08,'Write a fundraising strategy for':.15,'Write a cold email campaign for':.10,'Write an investor pitch for':.15,'Write SEO blog post ideas for':.08,'Write customer personas for':.10,'Write interview questions for hiring':.08,'Roast my business idea:':.05};
+const XP_PER_JOB={'Write a product description for':10,'Write a marketing tagline for':10,'Write social media posts for':12,'Write a press release for':15,'Write a landing page copy for':18,'Write a viral tweet thread about':10,'Write an onboarding email sequence for':15,'Write a business plan summary for':14,'Analyze the market opportunity for':18,'Write a competitive analysis for':15,'Write a SWOT analysis for':12,'Write a fundraising strategy for':18,'Write a cold email campaign for':14,'Write an investor pitch for':18,'Write SEO blog post ideas for':12,'Write customer personas for':14,'Write interview questions for hiring':12,'Roast my business idea:':10};
+
+function onTT(){
+  const t=document.getElementById('tt').value,p=PRICES[t]||.10;
+  document.getElementById('ja').value=p.toFixed(2);
+  document.getElementById('phint').textContent='$'+p.toFixed(2);
+  const xp=XP_PER_JOB[t]||10;
+  document.getElementById('xp-preview').textContent='+'+xp+' XP';
+  const pd=document.getElementById('priceDisplay');
+  if(t){pd.style.display='flex';document.getElementById('priceVal').textContent='$'+p.toFixed(2);}
+  else pd.style.display='none';
+  setPipe(1);
+}
+function setPipe(n){for(let i=1;i<=5;i++){const e=document.getElementById('p'+i);if(!e)continue;e.classList.remove('active','done');if(i<n)e.classList.add('done');else if(i===n)e.classList.add('active');}}
+
+async function submitJob(){
+  const type=document.getElementById('tt').value;
+  const task=document.getElementById('jt').value.trim();
+  const amount=parseFloat(document.getElementById('ja').value);
+  const email=document.getElementById('pe').value||'user@nexusai.com';
+  if(!type){toast('Select a task type','err');return;}
+  if(!task){toast('Enter a job description','err');return;}
+  if(!amount||amount<=0){toast('Enter a valid amount','err');return;}
+  const btn=document.getElementById('subBtn');btn.disabled=true;
+  const panel=document.getElementById('jres');
+  panel.innerHTML=`<div class="rc"><div class="rh"><span class="badge bc">PROCESSING</span><span style="font-size:12px;color:var(--txt3);font-family:var(--mono)">${esc(type.substring(0,30))}…</span></div>
+    <div class="steps">
+      <div class="sr active" id="s1"><div class="spin"></div>Dispatching research agent…</div>
+      <div class="sr" id="s2"><div class="sdot"></div>Writer generating output…</div>
+      <div class="sr" id="s3"><div class="sdot"></div>Audit agent reviewing…</div>
+      <div class="sr" id="s4"><div class="sdot"></div>Processing USDC via Locus…</div>
+      <div class="sr" id="s5"><div class="sdot"></div>Finalizing delivery…</div>
+    </div></div>`;
+  function setStep(n,txt){
+    for(let i=1;i<=5;i++){
+      const e=document.getElementById('s'+i);if(!e)continue;
+      e.classList.remove('active','done');
+      if(i<n){e.classList.add('done');e.innerHTML='<div class="sdot"></div>'+e.textContent.trim();}
+      else if(i===n){e.classList.add('active');e.innerHTML='<div class="spin"></div>'+(txt||e.textContent.trim());}
+    }
+    setPipe(n);
+  }
+  try{
+    setStep(2,'Writer generating output…');await delay(380);
+    setStep(3,'AI generating content…');
+    const aiR=await api('/api/ai',{task:type+' '+task,type});
+    if(aiR.error)throw new Error(aiR.error);
+    setStep(4,'Audit agent reviewing…');await delay(280);
+    setStep(5,'Processing USDC via Locus…');
+    let payNote='';
+    try{
+      const co=await api('/api/checkout/create',{task,taskType:type,amount});
+      if(co.id&&!co.error){
+        const pay=await api('/api/checkout/pay/'+co.id,{email});
+        payNote=pay.error?' (payment pending)':' · ✓ Paid via Locus';
+        if(!pay.error){addTx('💸',type.substring(0,30),amount.toFixed(2),false);}
+      }
+    }catch(pe){payNote=' (payment pending)';}
+    setPipe(6);
+    const xpEarned=XP_PER_JOB[type]||10;
+    const job={id:aiR.jobId,task,taskType:type,result:aiR.result,amount,tokens:aiR.tokens||0,cost:aiR.cost||'0',status:'completed',payNote,xp:xpEarned,ts:Date.now()};
+    jobStore.unshift(job);
+    xpState.streakDays=Math.min(xpState.streakDays+1,30);
+    initStreak();
+    addXP(xpEarned,'Job completed: '+type.substring(0,25));
+    addFeedItem('✅','Job completed: '+task.substring(0,40),'$'+amount.toFixed(2));
+    addNotification('Job completed! +'+xpEarned+' XP earned','green-dot',true);
+    checkBadges();
+    updateHeroNums();updateAnalytics();loadHist();
+    panel.innerHTML=`<div class="rc ok">
+      <div class="rh">
+        <span class="badge bg">✓ DELIVERED</span>
+        <span style="font-size:12px;color:var(--txt2)">${esc(type.substring(0,34))}</span>
+        <span class="badge ba" style="margin-left:auto">$${amount.toFixed(2)} USDC${payNote}</span>
+        <span class="badge bl">+${xpEarned} XP</span>
+        <button class="cpbtn" onclick="cp(document.getElementById('rcc').textContent)">COPY</button>
+      </div>
+      <div class="rb"><pre id="rcc">${esc(aiR.result)}</pre></div>
+      <div style="padding:11px 17px;border-top:1px solid var(--edge);display:flex;gap:9px">
+        <button class="btn-g" onclick="goto('#sec-history')">View in history →</button>
+        <button class="btn-g" onclick="cp(document.getElementById('rcc').textContent)">Copy result</button>
+        <button class="btn-g" style="margin-left:auto" onclick="clearJob()">Dismiss</button>
+      </div>
+    </div>`;
+    toast('Job completed'+payNote,'ok');
+  }catch(e){
+    panel.innerHTML=`<div class="rc"><div class="rh"><span class="badge" style="background:rgba(255,77,106,.09);color:var(--red);border:1px solid rgba(255,77,106,.18)">ERROR</span></div><div style="padding:18px;font-family:var(--mono);font-size:12px;color:var(--red)">${esc(e.message)}</div></div>`;
+    toast('Error: '+e.message,'err');setPipe(1);
+  }finally{btn.disabled=false;}
+}
+function clearJob(){
+  document.getElementById('tt').value='';document.getElementById('jt').value='';document.getElementById('ja').value='0.10';document.getElementById('priceDisplay').style.display='none';setPipe(1);
+  document.getElementById('jres').innerHTML=`<div class="rc"><div class="empty-rc"><div class="big">⚡</div><div style="font-family:var(--display);font-size:15px;font-weight:700;color:var(--txt2)">Ready for next job</div><div style="font-size:12px">Select a task type, write your brief, and deploy.</div></div></div>`;
+}
+
+// ══════════════════════════════ BADGES
+function checkBadges(){
+  if(jobStore.length>=1)earnBadge('b-pipeline','Pipeline Pro');
+  if(jobStore.length>=10)earnBadge('b-10jobs','Diamond');
+  if(xpState.streakDays>=7)earnBadge('b-streak','Streak Master');
+  const total=jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0);
+  if(total>=1)earnBadge('b-whale','Whale');
+}
+function earnBadge(id,name){
+  const el=document.getElementById(id);
+  if(el&&!el.classList.contains('earned')){
+    el.classList.add('earned');
+    el.querySelector('.bitem-icon')?.classList.remove('bitem-locked');
+    toast('🏆 Badge earned: '+name,'locus');
+    addXP(20,'Badge earned: '+name);
+    addNotification('Badge unlocked: '+name+' 🏆','locus-dot',true);
+  }
+}
+
+// ══════════════════════════════ BULK QUEUE (Feature 10)
+function addToQueue(){
+  const type=document.getElementById('tt').value;
+  const task=document.getElementById('jt').value.trim();
+  const amount=parseFloat(document.getElementById('ja').value)||0.10;
+  if(!type||!task){toast('Fill in task type and description first','err');return;}
+  if(jobQueue.length>=10){toast('Queue is full (max 10)','err');return;}
+  jobQueue.push({type,task,amount,status:'queued'});
+  updateQueueUI();
+  toast('Added to queue (#'+jobQueue.length+')','info');
+}
+function updateQueueUI(){
+  const total=jobQueue.reduce((s,j)=>s+j.amount,0);
+  document.getElementById('queue-count-badge').textContent=jobQueue.length+'/10';
+  document.getElementById('queue-total').textContent=total.toFixed(2);
+  document.getElementById('bulkBtn').textContent='📦 Bulk Queue ('+jobQueue.length+' jobs)';
+  document.getElementById('runQueueBtn').disabled=jobQueue.length===0;
+  if(!jobQueue.length){document.getElementById('queueList').innerHTML='<div style="text-align:center;color:var(--txt3);font-family:var(--mono);font-size:11px;padding:20px">Queue is empty. Use "+ Queue" on the Job form above.</div>';return;}
+  document.getElementById('queueList').innerHTML=jobQueue.map((j,i)=>`
+    <div class="qitem" id="qi-${i}">
+      <div class="qitem-num">${i+1}</div>
+      <div class="qitem-info"><div class="qitem-type">${esc(j.type.substring(0,30))}</div><div style="font-size:10px;color:var(--txt3)">${esc(j.task.substring(0,40))}</div></div>
+      <div class="qitem-amount">$${j.amount.toFixed(2)}</div>
+      <div class="qitem-status ${j.status==='done'?'spg':j.status==='error'?'spr':'spc'}">${j.status}</div>
+      <button class="btn-remove" onclick="removeFromQueue(${i})">×</button>
+    </div>
+  `).join('');
+  document.getElementById('exp-jobs-count').textContent=jobStore.length;
+  document.getElementById('exp-revenue').textContent='$'+jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0).toFixed(2);
+}
+function removeFromQueue(i){jobQueue.splice(i,1);updateQueueUI();}
+function clearQueue(){jobQueue=[];updateQueueUI();}
+async function runQueue(){
+  if(!jobQueue.length)return;
+  const btn=document.getElementById('runQueueBtn');btn.disabled=true;
+  const bonus=jobQueue.length>=3?5:0;
+  toast('Running '+jobQueue.length+' jobs in parallel…','locus');
+  for(let i=0;i<jobQueue.length;i++){
+    const j=jobQueue[i];j.status='running';updateQueueUI();
+    try{
+      const r=await api('/api/ai',{task:j.type+' '+j.task,type:j.type});
+      if(r.error)throw new Error(r.error);
+      j.status='done';j.result=r.result;
+      const xpE=(XP_PER_JOB[j.type]||10)+bonus;
+      addXP(xpE,'Batch job #'+(i+1));
+      jobStore.unshift({id:r.jobId,task:j.task,taskType:j.type,result:r.result,amount:j.amount,tokens:r.tokens||0,status:'completed',xp:xpE,ts:Date.now()});
+    }catch(e){j.status='error';}
+    updateQueueUI();
+  }
+  updateHeroNums();updateAnalytics();loadHist();
+  toast('Batch complete! +'+bonus+' batch XP bonus per job','ok');
+  btn.disabled=false;
+}
+
+// ══════════════════════════════ A/B TESTING (Feature 19)
+async function runAB(){
+  const prompt=document.getElementById('ab-prompt').value.trim();
+  if(!prompt){toast('Enter a test prompt','err');return;}
+  const agA=document.getElementById('ab-a').value;
+  const agB=document.getElementById('ab-b').value;
+  if(agA===agB){toast('Select different agents for A/B test','err');return;}
+  const btn=document.getElementById('abBtn');btn.disabled=true;
+  document.getElementById('ab-results').style.display='none';
+  document.getElementById('ab-a-win').innerHTML='';
+  document.getElementById('ab-b-win').innerHTML='';
+  document.getElementById('ab-a-result').textContent='Running…';
+  document.getElementById('ab-b-result').textContent='Running…';
+  toast('Running A/B test…','info');
+  try{
+    const sess=Date.now();
+    const[rA,rB]=await Promise.all([
+      api('/api/chat',{message:prompt,agentId:agA,sessionId:'ab_a_'+sess}),
+      api('/api/chat',{message:prompt,agentId:agB,sessionId:'ab_b_'+sess}),
+    ]);
+    document.getElementById('ab-a-label').textContent=AG[agA]?.em;
+    document.getElementById('ab-b-label').textContent=AG[agB]?.em;
+    document.getElementById('ab-a-result').textContent=rA.reply||'Error';
+    document.getElementById('ab-b-result').textContent=rB.reply||'Error';
+    document.getElementById('ab-a-tokens').textContent=AG[agA]?.name||agA;
+    document.getElementById('ab-b-tokens').textContent=AG[agB]?.name||agB;
+    // Simple winner heuristic: longer = more detailed
+    const aLen=(rA.reply||'').length, bLen=(rB.reply||'').length;
+    if(aLen>bLen*1.1){document.getElementById('ab-a-win').innerHTML='<span class="ab-winner-badge">WINNER</span>';}
+    else if(bLen>aLen*1.1){document.getElementById('ab-b-win').innerHTML='<span class="ab-winner-badge">WINNER</span>';}
+    else{document.getElementById('ab-a-win').textContent='Tie';document.getElementById('ab-b-win').textContent='Tie';}
+    document.getElementById('ab-results').style.display='grid';
+    addXP(8,'A/B test completed');
+    toast('A/B test complete!','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{btn.disabled=false;}
+}
+
+// ══════════════════════════════ PIPELINE BUILDER (Feature 17)
+function selectPipeNode(el){document.querySelectorAll('.pipe-node').forEach(n=>n.classList.remove('active-node'));el.classList.add('active-node');}
+function resetPipeline(){document.querySelectorAll('.pipe-node').forEach(n=>n.classList.remove('active-node'));document.querySelector('.pipe-node').classList.add('active-node');}
+async function runCustomPipeline(){
+  const prompt=document.getElementById('pipe-prompt').value.trim();
+  if(!prompt){toast('Enter a pipeline brief','err');return;}
+  const nodes=[...document.querySelectorAll('.pipe-node[data-agent]')].map(n=>n.getAttribute('data-agent'));
+  const btn=document.getElementById('runPipeBtn');btn.disabled=true;
+  const res=document.getElementById('pipe-result');
+  res.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--cyan)">Running '+nodes.length+'-stage pipeline…</div>';
+  try{
+    let context=prompt;
+    for(let i=0;i<nodes.length;i++){
+      const agId=nodes[i];
+      const r=await api('/api/chat',{message:(i===0?context:'Continue building on: '+context.substring(0,200)),agentId:agId,sessionId:'pipe_'+Date.now()});
+      if(r.error)throw new Error(r.error);
+      context=r.reply;
+    }
+    res.innerHTML=`<div style="background:var(--ink2);border:1px solid rgba(0,229,160,.25);border-radius:10px;padding:14px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1px;margin-bottom:8px">PIPELINE OUTPUT · ${nodes.length} STAGES</div>
+      <div style="font-size:12px;line-height:1.7;max-height:180px;overflow-y:auto">${esc(context)}</div>
+    </div>`;
+    addXP(20,'Full pipeline run');
+    earnBadge('b-pipeline','Pipeline Pro');
+    toast('Pipeline complete! +20 XP','ok');
+  }catch(e){res.innerHTML='<div style="color:var(--red);font-size:12px;font-family:var(--mono)">Error: '+esc(e.message)+'</div>';toast('Pipeline error','err');}
+  finally{btn.disabled=false;}
+}
+
+// ══════════════════════════════ SCHEDULER (Feature 16)
+function initSchedGrid(){
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today=new Date().getDay();
+  document.getElementById('schedGrid').innerHTML=days.map((d,i)=>`
+    <div class="sched-day ${i===today?'today-sched':''}" id="sg-${i}">
+      <div class="sched-day-name">${d}</div>
+      <div class="sched-day-num">${i+1}</div>
+      <div class="sched-dot"></div>
+    </div>
+  `).join('');
+}
+function addSchedule(){
+  const task=document.getElementById('sched-task').value;
+  const day=parseInt(document.getElementById('sched-day').value);
+  const brief=document.getElementById('sched-brief').value.trim();
+  if(!task||!brief){toast('Fill in all fields','err');return;}
+  schedules.push({task,day,brief,id:Date.now()});
+  const dayEl=document.getElementById('sg-'+day);
+  if(dayEl){dayEl.classList.add('has-job');}
+  renderSchedules();
+  toast('Job scheduled for '+['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][day],'ok');
+  addXP(5,'Job scheduled');
+}
+function renderSchedules(){
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('sched-list').innerHTML=schedules.map(s=>`
+    <div class="qitem">
+      <div class="qitem-num">📅</div>
+      <div class="qitem-info"><div class="qitem-type">${days[s.day]}: ${esc(s.task.substring(0,25))}</div><div style="font-size:10px;color:var(--txt3)">${esc(s.brief.substring(0,40))}</div></div>
+      <div class="qitem-status spc">SCHEDULED</div>
+      <button class="btn-remove" onclick="removeSchedule(${s.id})">×</button>
+    </div>
+  `).join('');
+}
+function removeSchedule(id){schedules=schedules.filter(s=>s.id!==id);renderSchedules();}
+
+// ══════════════════════════════ RATINGS (Feature 11)
+let currentRatingVal=0;
+function setRating(n){
+  currentRatingVal=n;
+  document.querySelectorAll('.star').forEach((s,i)=>{s.classList.toggle('filled',i<n);});
+}
+function submitReview(){
+  const agent=document.getElementById('rate-agent-sel').value;
+  const text=document.getElementById('review-text').value.trim();
+  if(!currentRatingVal){toast('Select a star rating','err');return;}
+  if(!text){toast('Write a review first','err');return;}
+  reviews[agent].push({rating:currentRatingVal,text,author:'You',time:new Date().toLocaleTimeString()});
+  renderReviews();
+  document.getElementById('review-text').value='';
+  setRating(0);
+  addXP(5,'Agent review submitted');
+  toast('Review submitted! +5 XP','ok');
+}
+function renderReviews(){
+  const agent=document.getElementById('rate-agent-sel').value;
+  const list=reviews[agent]||[];
+  if(!list.length){document.getElementById('reviewsList').innerHTML='<div style="color:var(--txt3);font-size:11px;font-family:var(--mono);text-align:center;padding:12px">No reviews yet</div>';return;}
+  document.getElementById('reviewsList').innerHTML=list.map(r=>`
+    <div class="rev-item">
+      <div class="rev-header">
+        <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        <div class="rev-author">${r.author}</div>
+        <div class="rev-time">${r.time}</div>
+      </div>
+      <div class="rev-text">${esc(r.text)}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════ WEBHOOKS (Feature 12)
+function addWebhook(){
+  const url=document.getElementById('wh-input').value.trim();
+  if(!url||!url.startsWith('http')){toast('Enter a valid URL','err');return;}
+  webhooks.push({url,active:true});
+  document.getElementById('wh-input').value='';
+  renderWebhooks();
+  toast('Webhook added','ok');
+}
+function renderWebhooks(){
+  document.getElementById('whList').innerHTML=webhooks.map((w,i)=>`
+    <div class="wh-item" data-wh="${i}">
+      <div class="wh-status ${w.active?'ok':'fail'}"></div>
+      <div class="wh-url">${esc(w.url)}</div>
+      <button class="wh-test" onclick="testWebhook(${i})">TEST</button>
+      <button class="btn-remove" onclick="deleteWebhook(${i})">×</button>
+    </div>
+  `).join('');
+}
+function deleteWebhook(i){webhooks.splice(i,1);renderWebhooks();}
+function testWebhook(i){
+  const url=webhooks[i]?.url||'endpoint';
+  toast('Webhook test fired → '+url.substring(0,40),'info');
+  addFeedItem('🔗','Webhook test sent: '+url.substring(0,40),null);
+}
+function removeWebhook(btn){btn.closest('.wh-item').remove();}
+
+// ══════════════════════════════ PROMPT STUDIO (Feature 14)
+function toggleTag(btn,tag){
+  btn.classList.toggle('on');
+  if(btn.classList.contains('on'))activePromptTags.add(tag);
+  else activePromptTags.delete(tag);
+  const fill=Math.min(100,(activePromptTags.size/6)*100);
+  document.getElementById('toneFill').style.width=fill+'%';
+}
+async function runStudio(){
+  const prompt=document.getElementById('studio-prompt').value.trim();
+  const agentId=document.getElementById('studio-agent').value;
+  if(!prompt){toast('Enter a prompt','err');return;}
+  const tags=[...activePromptTags].join(', ');
+  const fullPrompt=tags?`[Tone: ${tags}] ${prompt}`:prompt;
+  const res=document.getElementById('studio-result');
+  res.style.display='block';res.textContent='Generating…';
+  try{
+    const r=await api('/api/chat',{message:fullPrompt,agentId,sessionId:'studio_'+Date.now()});
+    if(r.error)throw new Error(r.error);
+    res.textContent=r.reply;
+    addXP(3,'Prompt studio run');
+    toast('Studio output ready','ok');
+  }catch(e){res.textContent='Error: '+e.message;toast(e.message,'err');}
+}
+
+// ══════════════════════════════ EXPORT (Feature 13)
+function exportHistory(fmt){
+  if(!jobStore.length){toast('No jobs to export','err');return;}
+  if(fmt==='csv'){
+    const header='ID,Task Type,Description,Amount,Tokens,Status,XP,Timestamp\n';
+    const rows=jobStore.map(j=>`"${j.id||''}","${(j.taskType||'').replace(/"/g,'""')}","${(j.task||'').replace(/"/g,'""')}","${j.amount||0}","${j.tokens||0}","${j.status||''}","${j.xp||0}","${new Date(j.ts||0).toISOString()}"`).join('\n');
+    dlFile(header+rows,'nexusai-jobs.csv','text/csv');
+  }else{
+    dlFile(JSON.stringify({jobs:jobStore,xp:xpState,exported:new Date().toISOString()},null,2),'nexusai-data.json','application/json');
+  }
+  toast('Export ready!','ok');
+}
+function exportMetrics(){
+  const data={totalJobs:jobStore.length,totalRevenue:jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0).toFixed(2),totalXP:xpState.total,level:xpState.level,streak:xpState.streakDays,exported:new Date().toISOString()};
+  dlFile(JSON.stringify(data,null,2),'nexusai-metrics.json','application/json');
+  toast('Metrics exported!','ok');
+}
+function dlFile(content,name,type){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();
+}
+
+// ══════════════════════════════ BALANCE
+async function loadBalance(){
+  document.getElementById('balLbl').textContent='Loading…';
+  try{const d=await fetch('/api/balance').then(r=>r.json());const b=d.balance??d.amount??d.usdc??d.availableBalance??null;const val=b!=null?(typeof b==='number'?b.toFixed(4):b)+' USDC':'Wallet Active';document.getElementById('balLbl').textContent=val;document.getElementById('pay-balance').textContent=val;}
+  catch(e){document.getElementById('balLbl').textContent='—';document.getElementById('pay-balance').textContent='—';}
+}
+
+// ══════════════════════════════ ANALYTICS
+async function updateAnalytics(){
+  try{
+    const d=await fetch('/api/metrics').then(r=>r.json());
+    document.getElementById('an-j').textContent=d.totalJobs;
+    document.getElementById('an-r').textContent='$'+d.totalRevenue;
+    const avg=d.totalJobs>0?(parseFloat(d.totalRevenue)/d.totalJobs).toFixed(3):'0.000';
+    document.getElementById('an-a').textContent='$'+avg;
+    const top=Object.entries(d.agentMetrics||{}).sort((a,b)=>b[1].jobs-a[1].jobs)[0];
+    if(top)document.getElementById('an-t').textContent=AG[top[0]]?.name.split(' ')[0]||'CEO';
+    const bt=d.byType||{};const mt=Math.max(...Object.values(bt),1);
+    const tbl=document.getElementById('tBars');
+    if(!Object.keys(bt).length){tbl.innerHTML='<div style="color:var(--txt3);font-size:11px;font-family:var(--mono)">No data yet</div>';}
+    else{tbl.innerHTML=Object.entries(bt).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>`
+      <div class="brow"><div class="bmeta"><span class="blbl">${k.replace('Write ','').substring(0,26)}</span><span class="bval">${v}</span></div>
+      <div class="btrack"><div class="bfill" style="width:${(v/mt*100).toFixed(0)}%;background:linear-gradient(90deg,var(--cyan),var(--cyan2))"></div></div></div>`).join('');}
+    const am=d.agentMetrics||{};const ma=Math.max(...Object.values(am).map(a=>a.jobs),1);
+    document.getElementById('aBars').innerHTML=Object.entries(am).map(([id,m])=>`
+      <div class="brow"><div class="bmeta"><span class="blbl">${AG[id]?.em} ${AG[id]?.name}</span><span class="bval">${m.jobs}</span></div>
+      <div class="btrack"><div class="bfill" style="width:${(m.jobs/ma*100).toFixed(0)}%;background:${AG[id]?.color||'var(--green)'}"></div></div></div>`).join('');
+    const mc=document.getElementById('mchart');
+    const rec=jobStore.slice(0,8).reverse();
+    if(rec.length){const mx2=Math.max(...rec.map(j=>parseFloat(j.amount)||0),.01);mc.innerHTML=rec.map(j=>{const h=Math.max(6,(parseFloat(j.amount)||0)/mx2*100);return`<div class="mb" style="height:${h}%"><div class="mbt">$${parseFloat(j.amount||0).toFixed(2)}</div></div>`;}).join('');}
+    else mc.innerHTML='<div style="width:100%;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:11px;font-family:var(--mono)">No revenue yet</div>';
+  }catch(e){}
+}
+
+// ══════════════════════════════ HISTORY
+let hf='all';
+function hFilter(f,btn){hf=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');loadHist();}
+async function loadHist(){
+  try{
+    const d=await fetch('/api/jobs?limit=50').then(r=>r.json());
+    document.getElementById('hcount').textContent=(d.total||0)+' jobs';
+    const jobs=d.jobs||[];
+    const fil=hf==='all'?jobs:jobs.filter(j=>j.status===hf);
+    const body=document.getElementById('hbody');
+    if(!fil.length){body.innerHTML='<tr><td colspan="9" class="etbl">No jobs match this filter</td></tr>';return;}
+    body.innerHTML=fil.map(j=>{
+      const sc={completed:'spg',paid:'spg',pending_payment:'spa',error:'spr'}[j.status]||'spc';
+      const localJob=jobStore.find(lj=>lj.id===j.id);
+      return`<tr>
+        <td class="mc" style="color:var(--txt3)">${j.id?j.id.substring(4,18):'—'}</td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${esc(j.taskType||'—')}</td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--txt2)">${esc(j.task||'—')}</td>
+        <td class="mc" style="color:var(--amber)">${j.amount?'$'+parseFloat(j.amount).toFixed(2):'—'}</td>
+        <td class="mc" style="color:var(--txt3)">${j.tokens||'—'}</td>
+        <td><span class="sp ${sc}">${j.status||'—'}</span></td>
+        <td class="mc" style="color:var(--locus)">${localJob?.xp||'—'}</td>
+        <td class="mc" style="color:var(--txt3);font-size:10px">${j.ts?new Date(j.ts).toLocaleTimeString():'—'}</td>
+        <td>${j.result?`<button class="cpbtn" onclick="cpJobResult('${j.id||''}')">COPY</button>`:'—'}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('exp-jobs-count').textContent=jobStore.length;
+    document.getElementById('exp-revenue').textContent='$'+jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0).toFixed(2);
+  }catch(e){}
+}
+
+// ══════════════════════════════ HERO NUMS
+function updateHeroNums(){
+  document.getElementById('hs-j').textContent=jobStore.length;
+  document.getElementById('hs-r').textContent=jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0).toFixed(2);
+  document.getElementById('hs-xp').textContent=xpState.total;
+  document.getElementById('hs-streak').textContent=xpState.streakDays;
+  document.getElementById('mc-settled').textContent='$'+jobStore.reduce((s,j)=>s+(parseFloat(j.amount)||0),0).toFixed(2);
+}
+
+// ══════════════════════════════ BATTLE
+async function battle(){
+  const topic=document.getElementById('btopic').value.trim();
+  const crit=document.getElementById('bcrit').value;
+  if(!topic){toast('Enter a battle topic','err');return;}
+  const btn=document.getElementById('bBtn');btn.disabled=true;
+  document.getElementById('bres').style.display='none';
+  document.getElementById('bsA').textContent='…';document.getElementById('bsB').textContent='…';
+  document.getElementById('bbA').style.width='0%';document.getElementById('bbB').style.width='0%';
+  document.getElementById('bfA').classList.remove('win','lose');document.getElementById('bfB').classList.remove('win','lose');
+  const ss=t=>document.getElementById('bStat').textContent=t;ss('Running agents in parallel…');
+  try{
+    const sess=Date.now();
+    const[rA,rB]=await Promise.all([
+      api('/api/chat',{message:topic,agentId:'writer',sessionId:'ba_'+sess}),
+      api('/api/chat',{message:topic,agentId:'research',sessionId:'bb_'+sess}),
+    ]);
+    if(rA.error||rB.error)throw new Error(rA.error||rB.error);
+    ss('CEO Agent judging…');
+    const jp=`You are an impartial judge. Topic: "${topic}"\nCriteria: ${crit}\n\nAGENT ALPHA (Writer):\n${rA.reply}\n\nAGENT BETA (Research):\n${rB.reply}\n\nReply EXACTLY:\nALPHA_SCORE: [1-10]\nBETA_SCORE: [1-10]\nWINNER: [ALPHA or BETA or TIE]\nREASONING: [2-3 sentences]`;
+    const jR=await api('/api/chat',{message:jp,agentId:'ceo',sessionId:'jg_'+sess});
+    if(jR.error)throw new Error(jR.error);
+    const v=jR.reply||'';
+    const sA=parseInt((v.match(/ALPHA_SCORE:\s*(\d+)/i)||[])[1])||5;
+    const sB=parseInt((v.match(/BETA_SCORE:\s*(\d+)/i)||[])[1])||5;
+    const w=(v.match(/WINNER:\s*(ALPHA|BETA|TIE)/i)||[])[1]||'TIE';
+    document.getElementById('bsA').textContent=sA+'/10';document.getElementById('bsB').textContent=sB+'/10';
+    document.getElementById('bbA').style.width=(sA*10)+'%';document.getElementById('bbB').style.width=(sB*10)+'%';
+    if(w==='ALPHA'){document.getElementById('bfA').classList.add('win');document.getElementById('bfB').classList.add('lose');}
+    else if(w==='BETA'){document.getElementById('bfB').classList.add('win');document.getElementById('bfA').classList.add('lose');}
+    document.getElementById('brA').textContent=rA.reply;document.getElementById('brB').textContent=rB.reply;document.getElementById('brV').textContent=v;
+    document.getElementById('bres').style.display='grid';
+    ss('✓ Complete · '+(w==='TIE'?'Tie!':(w==='ALPHA'?'Writer':'Research')+' wins'));
+    earnBadge('b-battle','Warrior');
+    addXP(25,'Battle completed');
+    addFeedItem('⚔️','Battle result: '+(w==='TIE'?'Tie':(w==='ALPHA'?'Writer':'Research')+' wins'),null);
+    toast('Battle complete! +25 XP','ok');
+  }catch(e){ss('Error: '+e.message);toast(e.message,'err');}
+  finally{btn.disabled=false;}
+}
+
+// ══════════════════════════════ UTILS
+async function api(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return r.json();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+function cp(t){navigator.clipboard.writeText(t).then(()=>toast('Copied!','ok')).catch(()=>toast('Copy failed','err'));}
+function cpJobResult(jobId){
+  // Try client-side store first, then server history
+  const local=jobStore.find(j=>j.id===jobId);
+  if(local?.result){cp(local.result);return;}
+  fetch('/api/jobs?limit=500').then(r=>r.json()).then(d=>{
+    const j=(d.jobs||[]).find(j=>j.id===jobId);
+    if(j?.result)cp(j.result);else toast('Result not found','err');
+  }).catch(()=>toast('Copy failed','err'));
+}
+function toast(msg,type='info'){
+  const e=document.createElement('div');e.className='toast '+type;
+  const ic={ok:'✓',err:'✕',info:'ℹ',locus:'⚡'};
+  e.innerHTML=`<span style="font-size:15px">${ic[type]||'ℹ'}</span>${esc(msg)}`;
+  document.getElementById('toasts').appendChild(e);setTimeout(()=>e.remove(),3600);
+}
+
+// ══════════════════════════════ MISSION CONTROL LIVE LATENCY SIMULATION
+function simulateMissionControl(){
+  const latencies=[112,134,98,156,124,143,107,119];
+  let idx=0;
+  setInterval(()=>{
+    const lat=latencies[idx%latencies.length]+Math.floor(Math.random()*20-10);
+    document.getElementById('mc-latency').textContent=lat+'ms';
+    idx++;
+  },4000);
+}
+
+// ══════════════════════════════ INIT
+window.addEventListener('load',async()=>{
+  renderAgGrid();renderCagList();pickAgent('ceo');loadBalance();updateAnalytics();
+  initStreak();initReferral();initSchedGrid();renderWebhooks();
+  simulateMissionControl();
+  try{
+    const s=await fetch('/api/status').then(r=>r.json());
+    const u=s.uptime||0;
+    document.getElementById('uptd').textContent='Uptime: '+Math.floor(u/3600)+'h '+Math.floor((u%3600)/60)+'m';
+  }catch(e){}
+  setInterval(loadBalance,30000);
+  setInterval(updateAnalytics,15000);
+  setInterval(loadHist,20000);
+  // Simulated welcome feed
+  setTimeout(()=>addFeedItem('🚀','NexusAI platform started. Locus gateway connected.',null),500);
+  setTimeout(()=>addFeedItem('⚡','Paygametic hackathon mode: ACTIVE. Earn XP!',null),1500);
+});
+</script>
+</body>
+</html>
