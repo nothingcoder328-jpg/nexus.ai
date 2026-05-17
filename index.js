@@ -1,226 +1,177 @@
 require('dotenv').config();
 const express = require('express');
 const Groq = require('groq-sdk');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
-});
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const LOCUS = 'https://api.paywithlocus.com/api';
+const KEY = process.env.LOCUS_API_KEY;
+const PORT = process.env.PORT || 3000;
 
-const jobHistory   = [];
-const chatHistory  = {};
-const agentMetrics = {
-  ceo:      { jobs: 0, earned: 0 },
-  research: { jobs: 0, earned: 0 },
-  writer:   { jobs: 0, earned: 0 },
-  audit:    { jobs: 0, earned: 0 },
-};
-
-const rateLimitMap = new Map();
-function rateLimit(maxPerMin) {
-  return (req, res, next) => {
-    const ip  = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-    const now = Date.now();
-    let entry = rateLimitMap.get(ip);
-    if (!entry || now > entry.resetAt) {
-      entry = { count: 0, resetAt: now + 60000 };
-      rateLimitMap.set(ip, entry);
-    }
-    entry.count++;
-    if (entry.count > maxPerMin) return res.status(429).json({ error: 'Rate limit exceeded. Try again in a minute.' });
-    next();
-  };
-}
-
-const groq  = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const LOCUS = 'https://beta-api.paywithlocus.com/api';
-const KEY   = process.env.LOCUS_API_KEY;
-
-async function locusFetch(path, opts = {}) {
-  const r = await fetch(LOCUS + path, {
-    ...opts,
-    headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', ...(opts.headers || {}) },
-  });
-  if (!r.ok) { const t = await r.text(); throw new Error('Locus ' + r.status + ': ' + t); }
-  return r.json();
-}
+const jobs = [];
+const chatSessions = {};
+let metrics = { jobsRun: 0, usdcSettled: 0, xpEarned: 0, dayStreak: 1 };
 
 const AGENTS = {
-  ceo: {
-    name: 'CEO Agent',
-    model: 'llama-3.3-70b-versatile',
-    system: 'You are the CEO of NexusAI, a visionary autonomous agent economy. Speak with authority, strategic clarity, and calm confidence. When asked about jobs, summarize at an executive level. Give concise, high-value answers. Always end with one actionable next step for the user.',
-  },
-  research: {
-    name: 'Research Agent',
-    model: 'llama-3.3-70b-versatile',
-    system: 'You are an elite research analyst at NexusAI. Find patterns, synthesize data, and deliver rigorous insights. Format responses with clear sections. Always cite assumptions and give confidence levels.',
-  },
-  writer: {
-    name: 'Writer Agent',
-    model: 'llama-3.3-70b-versatile',
-    system: 'You are a world-class content strategist and copywriter at NexusAI. Craft compelling narratives, punchy copy, and memorable content. Ask yourself: would this stop a scroll? Deliver multiple variations when possible.',
-  },
-  audit: {
-    name: 'Audit Agent',
-    model: 'llama-3.3-70b-versatile',
-    system: 'You are a meticulous audit and QA agent at NexusAI. Review work critically, spot weaknesses, suggest concrete improvements. Structure audits as: Summary → Issues Found → Recommendations → Score (1-10). Be direct but constructive.',
-  },
+  ceo: { name: 'CEO Agent', system: 'You are the CEO Agent of NexusAI — a strategic, decisive, visionary AI agent on Base L2 blockchain with Locus payments. You think big, move fast, and tie insights to business outcomes. Speak with authority and clarity. Keep responses sharp and actionable.' },
+  research: { name: 'Research Agent', system: 'You are the Research Agent of NexusAI — a deep analytical AI agent specializing in market research, data analysis, and intelligence gathering. Provide thorough data-driven insights. Be specific with numbers and facts. Format with clear sections.' },
+  writer: { name: 'Writer Agent', system: 'You are the Writer Agent of NexusAI — a creative persuasive AI agent specializing in content creation, copywriting, and communication. Craft compelling narratives and marketing copy that converts. Always deliver ready-to-use content.' },
+  audit: { name: 'Audit Agent', system: 'You are the Audit Agent of NexusAI — a meticulous AI agent specializing in quality assurance, fact-checking, risk assessment. Review work, identify errors, suggest improvements. Always provide a quality score out of 10 and specific improvement suggestions.' }
 };
 
 const TASK_PROMPTS = {
-  'Write a product description for':    'You are an expert copywriter. Write a compelling product description with key benefits, features and a strong call to action. Format: Hook → Features (3 bullets) → Benefits → CTA.',
-  'Write a marketing tagline for':      'You are a world-class branding expert. Write 5 punchy marketing taglines. Bold your top recommendation and explain why it wins.',
-  'Write a business plan summary for':  'You are a top startup advisor. Write a concise executive summary: Problem → Solution → Market Size → Revenue Model → Traction → Ask.',
-  'Write social media posts for':       'You are a viral social media expert. Write platform-optimized posts for Twitter/X (thread hook), Instagram (caption + hashtags), LinkedIn (professional tone), TikTok (script hook).',
-  'Analyze the market opportunity for': 'You are a senior market analyst. Deliver: TAM/SAM/SOM estimates → Top 3 trends → Competitive landscape → Strategic recommendation.',
-  'Write a cold email campaign for':    'You are a sales expert. Write a 3-email cold outreach sequence: Email 1 (cold intro), Email 2 (follow-up value), Email 3 (breakup). Include subject lines and CTAs.',
-  'Write an investor pitch for':        'You are a pitch coach. Write: 60-second elevator pitch + 5-slide deck outline with talking points for each slide.',
-  'Write SEO blog post ideas for':      'You are an SEO expert. Generate 10 high-traffic blog post ideas with: Title | Target keyword | Search intent | Meta description.',
-  'Write a press release for':          'You are a PR professional. Write a full press release: Headline → Dateline → Lead → Body (quotes + context) → Boilerplate.',
-  'Write a competitive analysis for':   'You are a strategy consultant. Analyze top 3 competitors: Strengths | Weaknesses | Positioning → How to beat each → Overall recommendation.',
-  'Write a landing page copy for':      'You are a conversion copywriter. Write full landing page: Hero headline + subhead → 3 key benefits → Social proof section → FAQ (3 Qs) → CTA.',
-  'Write customer personas for':        'You are a UX researcher. Create 3 detailed personas: Name + photo description → Demographics → Goals → Pain points → Buying triggers → Objections.',
-  'Write a fundraising strategy for':   'You are a fundraising expert. Deliver a 90-day plan: Week 1-2 (prep) → Week 3-6 (outreach) → Week 7-12 (close). Include target investor profiles.',
-  'Write interview questions for hiring':'You are an HR expert. Write 10 behavioral interview questions with: What to look for → Red flags → Green flags.',
-  'Write a viral tweet thread about':   'You are a Twitter growth expert. Write a 10-tweet thread: Hook tweet → 8 value tweets (numbered) → CTA finale. Each tweet ≤280 chars.',
-  'Write a SWOT analysis for':          'You are a business strategist. Deliver a full SWOT: Strengths (4) → Weaknesses (4) → Opportunities (4) → Threats (4). End with top strategic priority.',
-  'Write an onboarding email sequence for': 'You are a lifecycle marketer. Write a 5-email welcome sequence: Day 0 (welcome) → Day 2 (first value) → Day 5 (case study) → Day 10 (feature) → Day 14 (check-in).',
-  'Roast my business idea:':            'You are a brutally honest venture critic. Roast the business idea with sharp wit but always end with 3 genuine improvements that could save it.',
+  'Write a product description for': 'You are an expert copywriter. Write a compelling product description with key benefits, features and a strong call to action.',
+  'Write a marketing tagline for': 'You are a world-class branding expert. Write 5 punchy marketing taglines. Bold your top recommendation and explain why.',
+  'Write a business plan summary for': 'You are a top startup advisor. Write a concise executive summary with market opportunity, solution, revenue model, traction and funding ask.',
+  'Write social media posts for': 'You are a viral social media expert. Write platform-optimized posts for Twitter/X, Instagram, LinkedIn and TikTok with hooks and hashtags.',
+  'Analyze the market opportunity for': 'You are a senior market analyst. Write a detailed analysis with TAM/SAM/SOM, key trends, competitive landscape and recommendation.',
+  'Write a cold email campaign for': 'You are a sales expert. Write a 3-email cold outreach sequence with subject lines, personalization hooks and clear CTAs.',
+  'Write an investor pitch for': 'You are a pitch coach. Write a compelling 60-second elevator pitch and a 5-point investor deck outline.',
+  'Write SEO blog post ideas for': 'You are an SEO expert. Generate 10 high-traffic blog post ideas with titles, target keywords and meta descriptions.',
+  'Write a press release for': 'You are a PR professional. Write a newsworthy press release with headline, dateline, body and boilerplate.',
+  'Write a competitive analysis for': 'You are a strategy consultant. Write a competitive analysis with top 3 competitors, their strengths/weaknesses and how to beat them.',
+  'Write a landing page copy for': 'You are a conversion copywriter. Write full landing page copy with headline, subheadline, benefits, social proof and CTA.',
+  'Write customer personas for': 'You are a UX researcher. Create 3 detailed customer personas with demographics, goals, pain points and buying behavior.',
+  'Write a fundraising strategy for': 'You are a fundraising expert. Write a 90-day fundraising strategy with target investors, outreach plan and pitch tips.',
+  'Write interview questions for hiring': 'You are an HR expert. Write 10 role-specific interview questions with what to look for in each answer.',
+  'Write a viral tweet thread about': 'You are a Twitter growth expert. Write a 10-tweet viral thread with a hook tweet, value tweets and a strong CTA finale.'
 };
 
-function makeJobId() { return 'job_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
-function costFromTokens(tokens) { return (tokens / 1000 * 0.0008).toFixed(4); }
+async function callGroq(system, message, maxTokens = 800) {
+  const c = await groq.chat.completions.create({
+    messages: [{ role: 'system', content: system }, { role: 'user', content: message }],
+    model: 'llama-3.3-70b-versatile', max_tokens: maxTokens, temperature: 0.8
+  });
+  return c.choices[0].message.content;
+}
 
-app.get('/api/status', (req, res) => res.json({
-  status: 'alive', agents: Object.keys(AGENTS).length,
-  jobsTotal: jobHistory.length, uptime: Math.floor(process.uptime()),
-}));
+async function locusFetch(endpoint, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(LOCUS + endpoint, opts);
+  return r.json();
+}
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+app.get('/api/status', (req, res) => res.json({ status: 'alive', uptime: Math.floor(process.uptime()), agents: 4, jobsRun: metrics.jobsRun, network: 'Base L2', payment: 'Locus' }));
 
 app.get('/api/balance', async (req, res) => {
   try { res.json(await locusFetch('/pay/balance')); }
-  catch (e) { res.status(502).json({ error: e.message }); }
+  catch(e) { res.json({ error: e.message, balance: 0 }); }
 });
+
+app.get('/api/metrics', (req, res) => res.json({
+  jobsRun: metrics.jobsRun, usdcSettled: metrics.usdcSettled.toFixed(4),
+  xpEarned: metrics.xpEarned, dayStreak: metrics.dayStreak,
+  totalJobs: jobs.length,
+  successRate: jobs.length > 0 ? Math.round((jobs.filter(j=>j.status==='complete').length/jobs.length)*100) : 100
+}));
 
 app.get('/api/jobs', (req, res) => {
-  const page = parseInt(req.query.page || 1);
-  const limit = parseInt(req.query.limit || 20);
-  res.json({ jobs: jobHistory.slice((page - 1) * limit, page * limit), total: jobHistory.length, page });
+  const limit = parseInt(req.query.limit) || 50;
+  res.json(jobs.slice(-limit).reverse());
 });
 
-app.get('/api/metrics', (req, res) => {
-  const totalRevenue = jobHistory.reduce((s, j) => s + (parseFloat(j.amount) || 0), 0);
-  const byType = jobHistory.reduce((acc, j) => { acc[j.taskType] = (acc[j.taskType] || 0) + 1; return acc; }, {});
-  res.json({ totalJobs: jobHistory.length, totalRevenue: totalRevenue.toFixed(2), byType, agentMetrics });
-});
-
-app.get('/api/tasks', (req, res) => res.json({ tasks: Object.keys(TASK_PROMPTS) }));
-
-app.post('/api/ai', rateLimit(15), async (req, res) => {
+app.post('/api/ai', async (req, res) => {
   try {
     const { task, type } = req.body;
-    if (!task || !type) return res.status(400).json({ error: 'task and type are required' });
-    const system = TASK_PROMPTS[type] || 'You are a helpful AI assistant. Be thorough and structured.';
-    const completion = await groq.chat.completions.create({
-      messages: [{ role: 'system', content: system }, { role: 'user', content: task }],
-      model: 'llama-3.3-70b-versatile',
-      max_tokens: 800,
-    });
-    const result = completion.choices[0].message.content;
-    const tokens = completion.usage?.total_tokens || 0;
-    const job = { id: makeJobId(), task, taskType: type, result, tokens, cost: costFromTokens(tokens), status: 'completed', ts: Date.now() };
-    jobHistory.unshift(job);
-    if (jobHistory.length > 500) jobHistory.pop();
-    res.json({ success: true, result, jobId: job.id, tokens, cost: job.cost });
-  } catch (e) {
-    console.error('[/api/ai]', e.message);
-    res.status(500).json({ error: e.message });
-  }
+    if (!task) return res.json({ error: 'No task provided' });
+    const system = TASK_PROMPTS[type] || 'You are a helpful AI assistant for NexusAI.';
+    const result = await callGroq(system, task, 800);
+    const job = { id: 'job_'+Date.now(), type: type||'AI Task', task: task.substring(0,100), status: 'complete', result: result.substring(0,200)+'...', amount: 0, timestamp: new Date().toISOString(), xp: 10 };
+    jobs.push(job); metrics.jobsRun++; metrics.xpEarned += 10;
+    res.json({ success: true, result, jobId: job.id });
+  } catch(e) { res.json({ error: e.message }); }
 });
 
-app.post('/api/chat', rateLimit(20), async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   try {
-    const { message, agentId = 'ceo', sessionId = 'default' } = req.body;
-    if (!message) return res.status(400).json({ error: 'message is required' });
+    const { message, agentId, sessionId } = req.body;
+    if (!message) return res.json({ error: 'No message provided' });
     const agent = AGENTS[agentId] || AGENTS.ceo;
-    const key = agentId + '_' + sessionId;
-    if (!chatHistory[key]) chatHistory[key] = [];
-    chatHistory[key].push({ role: 'user', content: message });
-    const messages = chatHistory[key].slice(-20);
+    const sessKey = sessionId || 'default';
+    if (!chatSessions[sessKey]) chatSessions[sessKey] = [];
+    const history = chatSessions[sessKey];
     const completion = await groq.chat.completions.create({
-      messages: [{ role: 'system', content: agent.system }, ...messages],
-      model: agent.model,
-      max_tokens: 400,
+      messages: [{ role: 'system', content: agent.system }, ...history.slice(-10), { role: 'user', content: message }],
+      model: 'llama-3.3-70b-versatile', max_tokens: 600, temperature: 0.85
     });
     const reply = completion.choices[0].message.content;
-    chatHistory[key].push({ role: 'assistant', content: reply });
-    if (agentMetrics[agentId]) agentMetrics[agentId].jobs++;
-    res.json({ success: true, reply, agentId, agentName: agent.name });
-  } catch (e) {
-    console.error('[/api/chat]', e.message);
-    res.status(500).json({ error: e.message });
-  }
+    history.push({ role: 'user', content: message }, { role: 'assistant', content: reply });
+    if (history.length > 40) history.splice(0, 2);
+    metrics.xpEarned += 5;
+    res.json({ success: true, reply, agent: agent.name, sessionId: sessKey });
+  } catch(e) { res.json({ error: e.message }); }
 });
 
 app.delete('/api/chat/:agentId', (req, res) => {
-  const { agentId } = req.params;
-  const { sessionId = 'default' } = req.query;
-  delete chatHistory[agentId + '_' + sessionId];
+  delete chatSessions[req.query.sessionId || 'default'];
   res.json({ success: true });
 });
 
 app.post('/api/checkout/create', async (req, res) => {
   try {
-    const { task, taskType, amount } = req.body;
-    if (!amount || isNaN(amount)) return res.status(400).json({ error: 'valid amount required' });
-    const data = await locusFetch('/checkout/sessions', {
-      method: 'POST',
-      body: JSON.stringify({
-        amount: parseFloat(amount),
-        memo: 'NexusAI Job: ' + (task || 'AI Task'),
-        receiptConfig: {
-          enabled: true,
-          fields: { creditorName: 'NexusAI', supportEmail: 'nexusai@agent.com', lineItems: [{ description: task || taskType || 'AI Job', amount }] },
-        },
-      }),
+    const { task, amount } = req.body;
+    const data = await locusFetch('/checkout/sessions', 'POST', {
+      amount: parseFloat(amount), memo: 'NexusAI Job: ' + task,
+      receiptConfig: { enabled: true, fields: { creditorName: 'NexusAI', supportEmail: 'nexusai@agent.com', lineItems: [{ description: task, amount: parseFloat(amount) }] } }
     });
-    const job = { id: makeJobId(), task, taskType, amount, status: 'pending_payment', ts: Date.now() };
-    jobHistory.unshift(job);
-    res.json({ ...data, internalJobId: job.id });
-  } catch (e) {
-    console.error('[/api/checkout/create]', e.message);
-    res.status(502).json({ error: e.message });
-  }
+    res.json(data);
+  } catch(e) { res.json({ error: e.message }); }
 });
 
 app.get('/api/checkout/preflight/:sessionId', async (req, res) => {
   try { res.json(await locusFetch('/checkout/agent/preflight/' + req.params.sessionId)); }
-  catch (e) { res.status(502).json({ error: e.message }); }
+  catch(e) { res.json({ error: e.message }); }
 });
 
 app.post('/api/checkout/pay/:sessionId', async (req, res) => {
   try {
-    const data = await locusFetch('/checkout/agent/pay/' + req.params.sessionId, {
-      method: 'POST',
-      body: JSON.stringify({ payerEmail: req.body.email || 'user@nexusai.com' }),
-    });
-    const pending = jobHistory.find(j => j.status === 'pending_payment');
-    if (pending) { pending.status = 'paid'; pending.txId = data.txId || data.id; agentMetrics.ceo.earned += parseFloat(pending.amount || 0); }
+    const data = await locusFetch('/checkout/agent/pay/' + req.params.sessionId, 'POST', { payerEmail: req.body.email || 'user@nexusai.com' });
+    if (data && !data.error) { metrics.usdcSettled += parseFloat(req.body.amount || 0); metrics.xpEarned += 25; }
     res.json(data);
-  } catch (e) { res.status(502).json({ error: e.message }); }
+  } catch(e) { res.json({ error: e.message }); }
 });
 
 app.get('/api/checkout/status/:txId', async (req, res) => {
   try { res.json(await locusFetch('/checkout/agent/payments/' + req.params.txId)); }
-  catch (e) { res.status(502).json({ error: e.message }); }
+  catch(e) { res.json({ error: e.message }); }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => process.stdout.write('NexusAI running on :' + PORT + '\n'));
+app.post('/api/pipeline', async (req, res) => {
+  try {
+    const { task, agents: agentList } = req.body;
+    if (!task) return res.json({ error: 'No task provided' });
+    const pipeline = agentList || ['research', 'writer', 'audit'];
+    const results = [];
+    for (const agentId of pipeline) {
+      const agent = AGENTS[agentId] || AGENTS.ceo;
+      const prompt = results.length === 0 ? task : `Original task: ${task}\n\nPrevious output:\n${results[results.length-1].result}\n\nBuild on this with your expertise.`;
+      const result = await callGroq(agent.system, prompt, 600);
+      results.push({ agent: agent.name, agentId, result });
+    }
+    metrics.jobsRun++; metrics.xpEarned += 30;
+    res.json({ success: true, results, final: results[results.length-1]?.result });
+  } catch(e) { res.json({ error: e.message }); }
+});
+
+app.post('/api/battle', async (req, res) => {
+  try {
+    const { prompt, agentA, agentB } = req.body;
+    if (!prompt) return res.json({ error: 'No prompt provided' });
+    const [resultA, resultB] = await Promise.all([
+      callGroq(AGENTS[agentA]?.system || AGENTS.ceo.system, prompt, 500),
+      callGroq(AGENTS[agentB]?.system || AGENTS.writer.system, prompt, 500)
+    ]);
+    const judgment = await callGroq(AGENTS.ceo.system, `Judge this battle:\nPROMPT: ${prompt}\nAGENT A (${agentA}): ${resultA}\nAGENT B (${agentB}): ${resultB}\nFormat: SCORES: A=[/10] B=[/10] | WINNER: [A or B] | REASON: [2 sentences]`, 200);
+    metrics.xpEarned += 20;
+    res.json({ success: true, resultA, resultB, judgment, agentA: AGENTS[agentA]?.name || agentA, agentB: AGENTS[agentB]?.name || agentB });
+  } catch(e) { res.json({ error: e.message }); }
+});
+
+app.listen(PORT, '0.0.0.0', () => process.stdout.write('RUNNING\n'));
